@@ -1,4 +1,4 @@
-# ZA Auto Link — Site with Real Dealer Portal & Admin Dashboard
+# ZA Auto Link — Site with Real Dealer Portal & Admin Dashboard 
 
 Three files make up the whole site:
 - `index.html` — public site: browse, sell, buy requests, and the dealer portal (apply/login/upload)
