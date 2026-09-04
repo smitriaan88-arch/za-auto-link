@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>ZA Auto Link — Admin</title>
+<style>
+  :root {
+    --navy: #0B1F3A; --navy-deep: #071527; --steel: #3D4C63; --amber: #F2A900;
+    --amber-deep: #C98A00; --paper: #F6F5F2; --line: #E3E1DA; --ok: #1E8E5A; --warn: #C98A00; --bad: #C0392B;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--paper); color: var(--navy-deep); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  header { background: var(--navy-deep); color: #fff; padding: 16px 20px; }
+  .header-inner { max-width: 1080px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
+  header img { height: 38px; }
+  header .title { font-weight: 800; font-size: 16px; }
+  header .sub { font-size: 11px; color: #9FB0C9; }
+  h2 { font-size: 18px; color: var(--navy); margin: 0 0 4px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+  .card + .card { margin-top: 12px; }
+  label.field { display: block; margin-bottom: 14px; }
+  label.field span { display: block; font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  input, select, textarea { width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px; border: 1.5px solid var(--line); font-size: 14px; font-family: inherit; background: #fff; color: var(--navy-deep); }
+  textarea { resize: vertical; min-height: 80px; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--amber); box-shadow: 0 0 0 3px rgba(242,169,0,0.15); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media (max-width: 620px) { .row2, .row3 { grid-template-columns: 1fr; } }
+  .btn { font-family: inherit; font-weight: 700; font-size: 13px; padding: 9px 16px; border-radius: 8px; border: none; cursor: pointer; }
+  .btn-primary { background: var(--amber); color: var(--navy-deep); }
+  .btn-dark { background: var(--navy); color: #fff; }
+  .btn-ok { background: #E8F5EE; color: var(--ok); }
+  .btn-danger { background: #FBEAE8; color: var(--bad); }
+  .btn-ghost { background: none; color: var(--steel); text-decoration: underline; padding: 6px 8px; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+  .status-pending, .status-new { background: #FFF6E5; color: var(--warn); }
+  .status-approved, .status-closed { background: #E8F5EE; color: var(--ok); }
+  .status-rejected { background: #FBEAE8; color: var(--bad); }
+  .status-contacted { background: #E9EEF6; color: var(--steel); }
+  .status-draft { background: #EDEBF7; color: #5B4B9E; }
+  .status-sold { background: #EFEDE9; color: var(--steel); }
+  .views-badge { font-size: 11px; font-weight: 700; color: var(--steel); background: var(--paper); padding: 3px 9px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; }
+  .featured-badge { font-size: 11px; font-weight: 800; color: #8A6300; background: #FFF3D6; padding: 3px 9px; border-radius: 999px; }
+  .pricedrop-badge { font-size: 11px; font-weight: 800; color: #fff; background: var(--bad); padding: 3px 9px; border-radius: 999px; }
+  .rto-badge { font-size: 11px; font-weight: 800; color: #fff; background: var(--navy); padding: 3px 9px; border-radius: 999px; }
+  .pricedrop-box { background: #FBEAE8; border: 1px solid #F3C6C0; border-radius: 10px; padding: 14px; margin-bottom: 16px; }
+  .card.is-featured { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber); }
+  .btn-outline { background: transparent; color: var(--navy); border: 1.5px solid var(--navy); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .dealer-group { margin-bottom: 14px; border: 1px solid var(--line); border-radius: 10px; background: #fff; overflow: hidden; }
+  .dealer-group.has-pending { border-color: var(--amber); background: #FFFBF0; }
+  .dealer-group-header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; list-style: none; }
+  .dealer-group-header::-webkit-details-marker { display: none; }
+  .dealer-group-header .chevron { color: var(--steel); transition: transform 0.15s ease; flex-shrink: 0; }
+  .dealer-group[open] > .dealer-group-header .chevron { transform: rotate(90deg); }
+  .dealer-group-header h3 { margin: 0; font-size: 15px; color: var(--navy); }
+  .dealer-group-header .count-pill { background: #E9EEF6; color: var(--steel); }
+  .dealer-group-body { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .pending-flag { font-size: 11px; font-weight: 800; color: var(--amber-deep); background: #FFF3D6; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 6px; }
+  .feature-check { display: flex; align-items: center; gap: 6px; font-size: 13px; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; cursor: pointer; }
+  .feature-check input { accent-color: var(--amber); width: 16px; height: 16px; flex-shrink: 0; }
+  .spec-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 6px 8px 6px 14px; font-size: 13px; margin: 0 8px 8px 0; }
+  .spec-chip button { background: none; border: none; color: var(--bad); cursor: pointer; font-size: 15px; line-height: 1; padding: 2px 4px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+  .tabs button { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 9px; border: 1.5px solid var(--line); cursor: pointer; background: #fff; color: var(--navy); font-weight: 700; font-size: 13px; font-family: inherit; }
+  .tabs button.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .count-pill { background: #FBEAE8; color: var(--bad); font-size: 11px; font-weight: 800; border-radius: 999px; padding: 1px 7px; }
+  .tabs button.active .count-pill { background: var(--amber); color: var(--navy-deep); }
+  .tab-section { display: none; }
+  .tab-section.active { display: block; }
+  .empty { text-align: center; color: var(--steel); padding: 30px 0; background: #fff; border: 1px dashed var(--line); border-radius: 12px; }
+  .row-flex { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .note { background: #EAF1FB; border: 1px solid #C7DAF3; color: #1D5FA8; padding: 10px 12px; border-radius: 10px; font-size: 13px; margin-bottom: 8px; }
+  .settlement-line { margin-top: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+  .photo-strip { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .photo-strip img { cursor: pointer; }
+  .lightbox-overlay { display: none; position: fixed; inset: 0; background: rgba(7,21,39,0.94); z-index: 2000; align-items: center; justify-content: center; }
+  .lightbox-overlay.open { display: flex; }
+  .lightbox-image { max-width: 88vw; max-height: 84vh; object-fit: contain; border-radius: 6px; }
+  .lightbox-close { position: absolute; top: 20px; right: 24px; background: rgba(255,255,255,0.12); color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 26px; cursor: pointer; line-height: 1; }
+  .lightbox-counter { position: absolute; top: 28px; left: 24px; color: #fff; font-size: 14px; font-weight: 700; background: rgba(255,255,255,0.12); padding: 6px 14px; border-radius: 999px; }
+  .lightbox-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.12); color: #fff; border: none; width: 52px; height: 52px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .lightbox-arrow-left { left: 16px; }
+  .lightbox-arrow-right { right: 16px; }
+  .lightbox-arrow:hover, .lightbox-close:hover { background: rgba(255,255,255,0.22); }
+  .photo-strip img { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); }
+  .login-box { max-width: 380px; margin: 60px auto; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 28px; text-align: center; }
+  .login-box .icon { width: 46px; height: 46px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; color: var(--amber); }
+  .error-text { color: var(--bad); font-size: 13px; margin: 8px 0; }
+  .hidden { display: none !important; }
+  .photo-input-wrap { border: 2px dashed var(--line); border-radius: 10px; padding: 16px; text-align: center; margin-bottom: 10px; cursor: pointer; }
+  .photo-input-wrap input[type=file] { display: none; }
+  .photo-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; margin-top: 12px; }
+  .photo-thumb { position: relative; border-radius: 8px; overflow: hidden; aspect-ratio: 1; background: #EEF1F5; }
+  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .photo-thumb button { position: absolute; top: 3px; right: 3px; background: rgba(7,21,39,0.7); color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; cursor: pointer; }
+  .photo-thumb .cover-btn { top: 3px; left: 3px; right: auto; background: rgba(255,255,255,0.85); color: var(--navy); width: 22px; height: 22px; font-size: 13px; }
+  .photo-thumb .cover-badge { position: absolute; bottom: 0; left: 0; right: 0; background: var(--amber); color: var(--navy-deep); font-size: 10px; font-weight: 800; text-align: center; padding: 3px 2px; }
+  .send-spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid rgba(0,0,0,0.15); border-top-color: var(--navy); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="wrap">
+  <div class="login-box">
+    <div class="icon">&#128274;</div>
+    <h2 style="margin:0 0 6px;">Admin login</h2>
+    <p style="font-size:13px;color:var(--steel);margin-top:0;">This page is for ZA Auto Link staff only.</p>
+    <form id="loginForm">
+      <label class="field"><span>Email</span><input type="email" id="emailInput" required /></label>
+      <label class="field"><span>Password</span><input type="password" id="pwInput" required /></label>
+      <div class="error-text hidden" id="loginError"></div>
+      <button class="btn btn-primary" style="width:100%;" type="submit">Log in</button>
+    </form>
+  </div>
+</div>
+
+<div id="notAdminScreen" class="wrap hidden">
+  <div class="login-box">
+    <h2>Not authorized</h2>
+    <p style="font-size:13px;color:var(--steel);">This account isn't set up as an admin. Ask whoever manages the Firebase project to add your user ID to the <code>admins</code> collection.</p>
+    <button class="btn btn-dark" onclick="signOutAdmin()">Log out</button>
+  </div>
+</div>
+
+<div id="adminScreen" class="hidden">
+  <header>
+    <div class="header-inner">
+      <img src="data:image/png;base64,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" alt="ZA Auto Link" />
+      <div>
+        <div class="title">ZA AUTO LINK — Admin</div>
+        <div class="sub" id="adminEmailLabel">&nbsp;</div>
+      </div>
+      <div style="margin-left:auto;">
+        <button class="btn btn-ghost" style="color:#C9D4E3;" onclick="signOutAdmin()">Log out</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap" style="padding-top:20px;padding-bottom:80px;">
+    <div class="tabs" id="tabsBar">
+      <button data-tab="dealers" class="active">Dealer Approvals <span class="count-pill hidden" id="count-dealers">0</span></button>
+      <button data-tab="vehicles">Vehicle Approvals <span class="count-pill hidden" id="count-vehicles">0</span></button>
+      <button data-tab="drafts">Drafts <span class="count-pill hidden" id="count-drafts">0</span></button>
+      <button data-tab="sell">Sell Requests <span class="count-pill hidden" id="count-sell">0</span></button>
+      <button data-tab="wanted">Buy Requests <span class="count-pill hidden" id="count-wanted">0</span></button>
+      <button data-tab="insurance">Insurance Leads <span class="count-pill hidden" id="count-insurance">0</span></button>
+      <button data-tab="rto">RTO Requests <span class="count-pill hidden" id="count-rto">0</span></button>
+      <button data-tab="enquiries">Buyer Enquiries <span class="count-pill hidden" id="count-enquiries">0</span></button>
+      <button data-tab="dealerrequests">Dealer Sourcing <span class="count-pill hidden" id="count-dealerrequests">0</span></button>
+      <button data-tab="addvehicle">Add a Vehicle</button>
+      <button data-tab="banners">Banner Ads <span class="count-pill hidden" id="count-banners">0</span></button>
+      <button data-tab="specs">Vehicle Specs</button>
+      <button data-tab="activity">Activity Log</button>
+    </div>
+
+    <div class="tab-section active" data-tab="dealers">
+      <h2>Dealer Approvals</h2>
+      <p style="font-size:13px;color:var(--steel);margin-top:0;">Approve a dealer to let them log in and upload vehicles for your review.</p>
+      <div id="dealerDuplicateWarning"></div>
+      <div id="dealersList"></div>
+    </div>
+
+    <div class="tab-section" data-tab="vehicles">
+      <h2>Vehicle Approvals</h2>
+      <p style="font-size:13px;color:var(--steel);margin-top:0;">Grouped by dealer. See who uploaded what, review photos, then approve to make it live on the site.</p>
+      <div id="mostViewedBox" class="card hidden" style="margin-bottom:16px;"></div>
+      <div id="vehiclesList"></div>
+    </div>
+
+    <div class="tab-section" data-tab="drafts">
+      <h2>Drafts</h2>
+      <p style="font-size:13px;color:var(--steel);margin-top:0;">Vehicles you've prepared but haven't published yet — publish whenever you're ready.</p>
+      <div id="draftsList"></div>
+    </div>
+
+    <div class="tab-section" data-tab="sell">
+      <h2>Sell Requests</h2>
+      <p style="font-size:13px;color:var(--steel);margin-top:0;">Customers who want ZA Auto Link to buy their vehicle.</p>
+      <div id="sellList"></div>
+    </div>
+
+    <div class="tab-section" data-tab="wanted">
+      <h2>Buy Requests</h2>
+      <p style="font-size:13px;color:var(--steel);margin-top:0;">Customers looking for something specific that isn't currently listed.</p>
+      <div id="wantedList"></div>
+    </div>
+
+    <div class="tab-section" data-tab="insurance">
+      <h2>Insurance Leads</h2>
+      <p style="font-size:13px;color:var(--steel);margin-top:0;">Customers wanting a better insurance quote on their vehicle.</p>
+      <div id="insuranceList"></div>
+    </div>
+
+    <div class="tab-section" data-tab="rto">
+      <h2>RTO Requests</h2>
+      <p style="font-size:13px;color:var(--steel);margin-top:0;">General Rent-to-Own callback requests — not tied to a specific vehicle.</p>
+      <div id="rtoList"></div>
+    </div>
+
+    <div class="tab-section" data-tab="enquiries">
+      <h2>Buyer Enquiries</h2>
+      <p style="font-size:13px;color:var(--steel);margin-top:0;">Customers asking about a specific listed vehicle — which dealer it went to, and when.</p>
+      <div class="row2" style="margin-bottom:14px;">
+        <label class="field" style="margin-bottom:0;"><span>Filter by dealer</span>
+          <select id="enquiryDealerFilter" onchange="renderEnquiriesList()"><option value="">All dealers</option></select></label>
+        <label class="field" style="margin-bottom:0;"><span>Search</span>
+          <input id="enquirySearch" placeholder="Name, phone or vehicle" oninput="renderEnquiriesList()" /></label>
+      </div>
+      <div id="enquiriesList"></div>
+    </div>
+
+    <div class="tab-section" data-tab="dealerrequests">
+      <h2>Dealer Sourcing Requests</h2>
+      <p style="font-size:13px;color:var(--steel);margin-top:0;">Approved dealers asking you to source stock for them.</p>
+      <div id="dealerRequestsList"></div>
+    </div>
+
+    <div class="tab-section" data-tab="addvehicle">
+      <h2>Add a Vehicle Yourself</h2>
+      <p style="font-size:13px;color:var(--steel);margin-top:0;">Attribute it to a dealer, or keep it as ZA Auto Link's own stock. Publish now or save as a draft for later.</p>
+      <div class="card" style="max-width:640px;">
+        <form id="adminVehicleForm" onsubmit="return submitAdminVehicle(event)">
+          <div id="adminVehicleError"></div>
+          <div class="row2">
+            <label class="field"><span>Belongs to dealer</span>
+              <select name="dealerChoice" id="dealerChoiceSelect" onchange="onDealerChoiceChange()">
+                <option value="">ZA Auto Link (no specific dealer)</option>
+              </select>
+            </label>
+            <label class="field"><span>Publish</span>
+              <select name="publishMode">
+                <option value="live">Publish immediately (goes live now)</option>
+                <option value="draft">Save as draft (publish later)</option>
+              </select>
+            </label>
+          </div>
+          <label class="field"><span>Category</span>
+            <select name="category" id="adminAddCategorySelect"><option value="vehicles" selected>Vehicle</option><option value="trailers">Trailer</option><option value="caravans">Caravan</option><option value="bikes">Bike</option><option value="boats">Boat</option></select></label>
+          <div class="row2">
+            <div id="adminAddMakeWrap"><label class="field"><span>Make</span><input name="make" list="makesList" required /></label></div>
+            <label class="field"><span>Model</span><input name="model" required list="modelPresetsList_adminAdd" /></label>
+          </div>
+          <label class="field"><span>Location / town</span><input name="location" id="adminVehicleLocation" placeholder="e.g. Durban, KZN" /></label>
+          <div class="row3">
+            <label class="field"><span>Year</span><input type="number" name="year" required /></label>
+            <div id="adminAddMileageWrap"><label class="field"><span id="adminAddMileageLabel">Mileage (km)</span><input type="number" name="mileage" /></label></div>
+            <label class="field"><span>Price (R)</span><input type="number" name="price" required /></label>
+          </div>
+          <div class="row3">
+            <label class="field"><span>Condition</span><select name="condition"><option>New</option><option selected>Used</option><option>Demo</option></select></label>
+            <div id="adminAddFuelWrap"><label class="field"><span>Fuel</span><select name="fuel"><option>Petrol</option><option>Diesel</option><option>Hybrid</option><option>Electric</option></select></label></div>
+            <div id="adminAddTransmissionWrap"><label class="field"><span>Transmission</span><select name="transmission"><option>Manual</option><option>Automatic</option></select></label></div>
+          </div>
+          <label class="field"><span>Listing type</span>
+            <select name="listingType"><option value="sale" selected>For Sale</option><option value="rto">Rent to Own</option></select></label>
+          <label class="field"><span>Description</span><textarea name="description"></textarea></label>
+          <label class="field"><span>Features</span>
+            <div class="features-grid" id="adminAddFeaturesChecklist"></div>
+          </label>
+          <label class="field"><span>Photos (1–8)</span>
+            <div class="photo-input-wrap" onclick="document.getElementById('adminPhotoInput').click()">
+              <input type="file" id="adminPhotoInput" accept="image/*" multiple onchange="handleAdminPhotoSelect(event)" />
+              <div style="font-size:13px;color:var(--steel);">Tap to choose photos from your device or computer (up to 8)</div>
+              <div class="photo-preview-grid" id="adminPhotoPreviewGrid"></div>
+            </div>
+          </label>
+          <button class="btn btn-primary" type="submit" style="width:100%;"><span class="btn-label">Publish vehicle</span></button>
+        </form>
+        <div class="note hidden" id="adminVehicleSuccess" style="margin-top:12px;background:#E8F5EE;border-color:#BEE6D2;color:#166944;">Published! It's live on the site now.</div>
+      </div>
+    </div>
+
+    <div class="tab-section" data-tab="banners">
+      <h2>Banner Ads</h2>
+      <p style="font-size:13px;color:var(--steel);margin-top:0;">4 slots on the public site: top of homepage, top of Browse Vehicles, top of Rent to Own, and above the footer. A banner only goes live once you tick Approve — do that after payment's in. It disappears on its own once the end date passes; you don't need to remove it.</p>
+
+      <div class="card" style="max-width:720px;margin-bottom:20px;">
+        <h3 style="font-size:15px;color:var(--navy);margin-top:0;">Add a new banner</h3>
+        <form id="addBannerForm" onsubmit="return submitAddBanner(event)">
+          <div id="addBannerError"></div>
+          <div class="row2">
+            <label class="field"><span>Advertiser name</span><input name="advertiserName" required /></label>
+            <label class="field"><span>Contact (phone/email)</span><input name="contactInfo" /></label>
+          </div>
+          <div class="row3">
+            <label class="field"><span>Slot</span>
+              <select name="slot" required>
+                <option value="1">1 — Homepage top</option>
+                <option value="2">2 — Browse Vehicles top</option>
+                <option value="3">3 — Rent to Own top</option>
+                <option value="4">4 — Site footer</option>
+              </select></label>
+            <label class="field"><span>Start date</span><input type="date" name="startDate" required /></label>
+            <label class="field"><span>End date</span><input type="date" name="endDate" required /></label>
+          </div>
+          <label class="field"><span>Link when clicked (optional)</span><input type="url" name="linkUrl" placeholder="https://..." /></label>
+          <label class="field"><span>Banner image</span>
+            <div class="photo-input-wrap" onclick="document.getElementById('bannerPhotoInput').click()">
+              <input type="file" id="bannerPhotoInput" accept="image/*" onchange="handleBannerPhotoSelect(event)" />
+              <div style="font-size:13px;color:var(--steel);">Tap to choose the banner image</div>
+              <div class="photo-preview-grid" id="bannerPhotoPreview"></div>
+            </div>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--navy);cursor:pointer;margin:6px 0 14px;">
+            <input type="checkbox" name="approved" style="width:16px;height:16px;" />
+            Approve now (payment already received — goes live immediately if within the date range)
+          </label>
+          <button class="btn btn-primary" type="submit" style="width:100%;"><span class="btn-label">Save banner</span></button>
+        </form>
+      </div>
+
+      <div id="bannersList"></div>
+
+      <div class="card" style="max-width:640px;margin-top:24px;">
+        <h3 style="font-size:15px;color:var(--navy);margin-top:0;">Ad rates (shown on the public "Advertise With Us" page)</h3>
+        <div id="adPricingListAdmin" style="margin-bottom:16px;"></div>
+        <form id="addAdPriceForm" onsubmit="return submitAddAdPrice(event)" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input name="priceLabel" placeholder="e.g. Slot 1 — Homepage" required style="flex:2;min-width:160px;" />
+          <input name="priceValue" placeholder="e.g. R650 / week" required style="flex:1;min-width:120px;" />
+          <button class="btn btn-primary" type="submit">Add</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="tab-section" data-tab="specs">
+      <h2>Specs by Category</h2>
+      <p style="font-size:13px;color:var(--steel);margin-top:0;">Each category can have its own checklist and its own form fields — e.g. trailers don't need a Make, boats measure Hours instead of km. Pick a category below to edit its setup.</p>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;" id="specsCategoryTabs">
+        <button type="button" class="btn btn-dark" data-spec-cat="vehicles" onclick="switchSpecsCategory('vehicles')">Vehicles</button>
+        <button type="button" class="btn" data-spec-cat="trailers" onclick="switchSpecsCategory('trailers')">Trailers</button>
+        <button type="button" class="btn" data-spec-cat="caravans" onclick="switchSpecsCategory('caravans')">Caravans</button>
+        <button type="button" class="btn" data-spec-cat="bikes" onclick="switchSpecsCategory('bikes')">Bikes</button>
+        <button type="button" class="btn" data-spec-cat="boats" onclick="switchSpecsCategory('boats')">Boats</button>
+      </div>
+
+      <div class="card" style="max-width:640px;margin-bottom:20px;">
+        <h3 style="font-size:15px;color:var(--navy);margin-top:0;">Which fields apply to <span id="specsCatLabel1">Vehicles</span>?</h3>
+        <p style="font-size:12px;color:var(--steel);margin-top:-6px;">Untick anything that's not relevant — it's hidden from the loading form for this category only.</p>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--navy);cursor:pointer;"><input type="checkbox" id="cfgShowMake" style="width:16px;height:16px;"> Make</label>
+          <div style="margin-left:24px;">
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--steel);cursor:pointer;"><input type="checkbox" id="cfgRequireMake" style="width:16px;height:16px;"> Must be filled in (untick to make it optional, e.g. for Trailers)</label>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--navy);cursor:pointer;"><input type="checkbox" id="cfgShowMileage" style="width:16px;height:16px;"> Mileage / usage field</label>
+          <div style="margin-left:24px;">
+            <input id="cfgMileageLabel" placeholder="Field label, e.g. Mileage (km) or Engine Hours" style="width:100%;max-width:320px;" />
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--navy);cursor:pointer;"><input type="checkbox" id="cfgShowFuel" style="width:16px;height:16px;"> Fuel type</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--navy);cursor:pointer;"><input type="checkbox" id="cfgShowTransmission" style="width:16px;height:16px;"> Transmission</label>
+        </div>
+        <button class="btn btn-primary" type="button" onclick="saveCategoryFieldsConfig()">Save field setup for <span id="specsCatLabel2">Vehicles</span></button>
+      </div>
+
+      <div class="card" style="max-width:640px;margin-bottom:20px;">
+        <h3 style="font-size:15px;color:var(--navy);margin-top:0;"><span id="specsCatLabel4">Vehicle</span> model options</h3>
+        <p style="font-size:12px;color:var(--steel);margin-top:-6px;">Optional preset list for the Model field — e.g. "Piggyback Trailer", "Multi-Purpose Trailer". Dealers can still type their own if it's not in the list; leave this empty to keep Model a plain text field.</p>
+        <div id="modelPresetsList" style="margin-bottom:16px;"></div>
+        <form id="addModelPresetForm" onsubmit="return submitAddModelPreset(event)" style="display:flex;gap:8px;">
+          <input name="presetName" placeholder="e.g. Multi-Purpose Trailer" required style="flex:1;" />
+          <button class="btn btn-primary" type="submit">Add</button>
+        </form>
+      </div>
+
+      <div class="card" style="max-width:640px;">
+        <h3 style="font-size:15px;color:var(--navy);margin-top:0;"><span id="specsCatLabel3">Vehicle</span> spec checklist</h3>
+        <p style="font-size:12px;color:var(--steel);margin-top:-6px;">The checkboxes dealers (and you) tick when listing this category — e.g. A/C, ABS, Tow Bar.</p>
+        <div id="specsList" style="margin-bottom:16px;"></div>
+        <form id="addSpecForm" onsubmit="return submitAddSpec(event)" style="display:flex;gap:8px;">
+          <input name="specName" placeholder="e.g. Sunroof" required style="flex:1;" />
+          <button class="btn btn-primary" type="submit">Add</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="tab-section" data-tab="activity">
+      <h2>Activity Log</h2>
+      <p style="font-size:13px;color:var(--steel);margin-top:0;">Who did what, and when — approvals, edits, deletions. Most recent first.</p>
+      <div id="activityLogList"></div>
+    </div>
+  </div>
+</div>
+
+<datalist id="makesList"></datalist>
+<datalist id="modelPresetsList_adminAdd"></datalist>
+<datalist id="modelPresetsList_adminEdit"></datalist>
+
+<!-- Edit vehicle modal (admin) -->
+<div class="modal-overlay" id="editVehicleModal" style="display:none;position:fixed;inset:0;background:rgba(7,21,39,0.55);align-items:center;justify-content:center;z-index:1000;padding:16px;">
+  <div class="card" style="max-width:560px;width:100%;max-height:88vh;overflow-y:auto;">
+    <div class="row-flex" style="margin-bottom:10px;">
+      <h2 style="margin:0;">Edit vehicle</h2>
+      <button class="btn btn-ghost" onclick="closeEditVehicleModal()">Close</button>
+    </div>
+    <form id="editVehicleForm" onsubmit="return submitEditVehicle(event)">
+      <div id="editVehicleError"></div>
+      <label class="field"><span>Belongs to dealer</span>
+        <select name="dealerChoice" id="editDealerChoiceSelect" onchange="onEditDealerChoiceChange()">
+          <option value="">ZA Auto Link (no specific dealer)</option>
+        </select>
+      </label>
+      <label class="field"><span>Category</span>
+        <select name="category" id="adminEditCategorySelect"><option value="vehicles">Vehicle</option><option value="trailers">Trailer</option><option value="caravans">Caravan</option><option value="bikes">Bike</option><option value="boats">Boat</option></select></label>
+      <div class="row2">
+        <div id="adminEditMakeWrap"><label class="field"><span>Make</span><input name="make" list="makesList" required /></label></div>
+        <label class="field"><span>Model</span><input name="model" required list="modelPresetsList_adminEdit" /></label>
+      </div>
+      <label class="field"><span>Location / town</span><input name="location" placeholder="e.g. Durban, KZN" /></label>
+      <div class="row3">
+        <label class="field"><span>Year</span><input type="number" name="year" required /></label>
+        <div id="adminEditMileageWrap"><label class="field"><span id="adminEditMileageLabel">Mileage (km)</span><input type="number" name="mileage" /></label></div>
+        <label class="field"><span>Price (R)</span><input type="number" name="price" required /></label>
+      </div>
+      <div class="pricedrop-box">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;">
+          <input type="checkbox" name="priceDropActive" id="editPriceDropCheckbox" onchange="onEditPriceDropToggle()" style="width:16px;height:16px;accent-color:var(--bad);" />
+          Show as a Price Drop on the site
+        </label>
+        <div id="editOriginalPriceWrap" class="hidden" style="margin-top:10px;">
+          <label class="field" style="margin-bottom:0;"><span>Original price (R) — the "was" price</span><input type="number" name="originalPrice" id="editOriginalPriceInput" /></label>
+        </div>
+      </div>
+      <div class="row3">
+        <label class="field"><span>Condition</span><select name="condition"><option>New</option><option>Used</option><option>Demo</option></select></label>
+        <div id="adminEditFuelWrap"><label class="field"><span>Fuel</span><select name="fuel"><option>Petrol</option><option>Diesel</option><option>Hybrid</option><option>Electric</option></select></label></div>
+        <div id="adminEditTransmissionWrap"><label class="field"><span>Transmission</span><select name="transmission"><option>Manual</option><option>Automatic</option></select></label></div>
+      </div>
+      <label class="field"><span>Listing type</span>
+        <select name="listingType"><option value="sale" selected>For Sale</option><option value="rto">Rent to Own</option></select></label>
+      <label class="field"><span>Description</span><textarea name="description"></textarea></label>
+      <label class="field"><span>Features</span>
+        <div class="features-grid" id="adminEditFeaturesChecklist"></div>
+      </label>
+      <label class="field"><span>Photos (1–8)</span>
+        <div class="photo-input-wrap" onclick="document.getElementById('editPhotoInput').click()">
+          <input type="file" id="editPhotoInput" accept="image/*" multiple onchange="handleEditPhotoSelect(event)" />
+          <div style="font-size:13px;color:var(--steel);">Tap to add more photos, or remove ones below</div>
+          <div class="photo-preview-grid" id="editPhotoPreviewGrid"></div>
+        </div>
+      </label>
+      <button class="btn btn-primary" type="submit" style="width:100%;"><span class="btn-label">Save changes</span></button>
+    </form>
+  </div>
+</div>
+
+<!-- Edit dealer modal (fix typos in an application) -->
+<div class="modal-overlay" id="editDealerModal" style="display:none;position:fixed;inset:0;background:rgba(7,21,39,0.55);align-items:center;justify-content:center;z-index:1000;padding:16px;">
+  <div class="card" style="max-width:480px;width:100%;">
+    <div class="row-flex" style="margin-bottom:10px;">
+      <h2 style="margin:0;">Edit dealer</h2>
+      <button class="btn btn-ghost" onclick="closeEditDealerModal()">Close</button>
+    </div>
+    <div class="note">Editing the email here only updates this record — it does not change their actual login email. To change their login, do that in Firebase Console → Authentication.</div>
+    <form id="editDealerForm" onsubmit="return submitEditDealer(event)">
+      <div id="editDealerError"></div>
+      <label class="field"><span>Dealership name</span><input name="name" required /></label>
+      <div class="row2">
+        <label class="field"><span>Contact person</span><input name="contactPerson" required /></label>
+        <label class="field"><span>Phone</span><input name="phone" required /></label>
+      </div>
+      <label class="field"><span>Email (record only, see note above)</span><input type="email" name="email" required /></label>
+      <label class="field"><span>Location / town</span><input name="location" placeholder="e.g. Durban, KZN" /></label>
+      <div>
+        <span style="display:block;font-size:13px;font-weight:700;color:var(--navy);margin-bottom:6px;">What does this dealership sell?</span>
+        <div class="features-grid" style="margin-top:6px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--navy);cursor:pointer;"><input type="checkbox" name="cat_vehicles" style="width:16px;height:16px;" /> Vehicles</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--navy);cursor:pointer;"><input type="checkbox" name="cat_rto" style="width:16px;height:16px;" /> Rent to Own</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--navy);cursor:pointer;"><input type="checkbox" name="cat_trailers" style="width:16px;height:16px;" /> Trailers</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--navy);cursor:pointer;"><input type="checkbox" name="cat_caravans" style="width:16px;height:16px;" /> Caravans</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--navy);cursor:pointer;"><input type="checkbox" name="cat_bikes" style="width:16px;height:16px;" /> Bikes</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--navy);cursor:pointer;"><input type="checkbox" name="cat_boats" style="width:16px;height:16px;" /> Boats</label>
+        </div>
+      </div>
+      <div class="row2">
+        <label class="field"><span>WhatsApp number (for lead alerts)</span><input name="whatsappNumber" placeholder="27821234567" /></label>
+        <label class="field"><span>CallMeBot API key</span><input name="whatsappApiKey" placeholder="Dealer sets this up themselves — see their portal" /></label>
+      </div>
+      <button class="btn btn-primary" type="submit" style="width:100%;margin-top:14px;"><span class="btn-label">Save changes</span></button>
+    </form>
+  </div>
+</div>
+
+<!-- Full-screen photo lightbox for reviewing dealer/vehicle photos -->
+<div class="lightbox-overlay" id="lightboxModal">
+  <button class="lightbox-close" onclick="closeLightbox()" title="Close">&times;</button>
+  <div class="lightbox-counter" id="lightboxCounter"></div>
+  <button class="lightbox-arrow lightbox-arrow-left" id="lightboxPrev" onclick="lightboxPrev()">&#10094;</button>
+  <img class="lightbox-image" id="lightboxImage" src="" alt="Vehicle photo" />
+  <button class="lightbox-arrow lightbox-arrow-right" id="lightboxNext" onclick="lightboxNext()">&#10095;</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+const MAKES = ["Toyota", "Volkswagen", "Ford", "Hyundai", "Suzuki", "Nissan", "Renault", "Isuzu", "Haval", "Mercedes-Benz", "BMW", "Audi", "Kia"];
+document.getElementById("makesList").innerHTML = MAKES.map((m) => `<option value="${m}">`).join("");
+
+// ---- Tabs ----
+document.querySelectorAll("#tabsBar button").forEach((b) => {
+  b.addEventListener("click", () => {
+    document.querySelectorAll("#tabsBar button").forEach((x) => x.classList.toggle("active", x === b));
+    document.querySelectorAll(".tab-section").forEach((s) => s.classList.toggle("active", s.dataset.tab === b.dataset.tab));
+  });
+});
+
+// ---- Auth ----
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const errorBox = document.getElementById("loginError");
+  errorBox.classList.add("hidden");
+  try {
+    await auth.signInWithEmailAndPassword(document.getElementById("emailInput").value, document.getElementById("pwInput").value);
+  } catch (err) {
+    errorBox.textContent = err.message;
+    errorBox.classList.remove("hidden");
+  }
+});
+function signOutAdmin() { auth.signOut(); }
+
+let unsubs = [];
+function clearSubs() { unsubs.forEach((u) => u()); unsubs = []; }
+
+auth.onAuthStateChanged(async (user) => {
+  clearSubs();
+  if (!user) {
+    document.getElementById("loginScreen").classList.remove("hidden");
+    document.getElementById("notAdminScreen").classList.add("hidden");
+    document.getElementById("adminScreen").classList.add("hidden");
+    return;
+  }
+  let isAdmin = false;
+  try {
+    const doc = await db.collection("admins").doc(user.uid).get();
+    isAdmin = doc.exists;
+  } catch (e) { console.error(e); }
+
+  if (!isAdmin) {
+    document.getElementById("loginScreen").classList.add("hidden");
+    document.getElementById("notAdminScreen").classList.remove("hidden");
+    document.getElementById("adminScreen").classList.add("hidden");
+    return;
+  }
+
+  document.getElementById("loginScreen").classList.add("hidden");
+  document.getElementById("notAdminScreen").classList.add("hidden");
+  document.getElementById("adminScreen").classList.remove("hidden");
+  document.getElementById("adminEmailLabel").textContent = user.email;
+  startListeners();
+});
+
+function statusLabel(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// Records who did what, for the Activity Log tab. Best-effort — never blocks
+// or breaks the actual action if logging fails for some reason.
+function logActivity(action, detail) {
+  try {
+    db.collection("activityLog").add({
+      action, detail: detail || "",
+      actorEmail: (auth.currentUser && auth.currentUser.email) || "unknown",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+  } catch (e) {
+    console.warn("Activity log failed (action still went through):", e);
+  }
+}
+function setCount(id, n) {
+  const el = document.getElementById("count-" + id);
+  if (!el) return;
+  el.textContent = n;
+  el.classList.toggle("hidden", n === 0);
+}
+
+// ---- Per-category feature checklist + per-category field visibility ----
+// Vehicles keep using the original settings/vehicleFeatures doc (no data
+// migration needed for what's already live); every other category gets its
+// own settings/features_<category> doc.
+function featuresDocId(category) { return category === "vehicles" ? "vehicleFeatures" : "features_" + category; }
+window.categoryFeaturesLists = { vehicles: [], trailers: [], caravans: [], bikes: [], boats: [] };
+window.categoryFieldsConfig = {};
+function fieldsConfigFor(category) {
+  return Object.assign({ showMake: true, requireMake: true, showMileage: true, mileageLabel: "Mileage (km)", showFuel: true, showTransmission: true, modelPresets: [] }, window.categoryFieldsConfig[category] || {});
+}
+function renderFeatureCheckboxes(containerId, selected, category) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const list = window.categoryFeaturesLists[category || currentSpecsCategory || "vehicles"] || [];
+  if (!list.length) {
+    container.innerHTML = '<div style="font-size:13px;color:var(--steel);">No spec options set up yet — add some under the Specs tab.</div>';
+    return;
+  }
+  container.innerHTML = list.map((f) => `
+    <label class="feature-check">
+      <input type="checkbox" value="${f}" ${selected && selected.includes(f) ? "checked" : ""}>
+      <span>${f}</span>
+    </label>
+  `).join("");
+}
+function getCheckedFeatures(containerId) {
+  return Array.from(document.querySelectorAll("#" + containerId + " input[type=checkbox]:checked")).map((cb) => cb.value);
+}
+// Shows/hides Make, Mileage, Fuel, Transmission on an add/edit form and
+// relabels Mileage — then re-renders that form's checklist to match.
+function applyCategoryFieldsToForm(category, prefix, selectedFeatures) {
+  const cfg = fieldsConfigFor(category);
+  const set = (id, show) => { const el = document.getElementById(id); if (el) el.classList.toggle("hidden", !show); };
+  set(prefix + "MakeWrap", cfg.showMake);
+  set(prefix + "MileageWrap", cfg.showMileage);
+  set(prefix + "FuelWrap", cfg.showFuel);
+  set(prefix + "TransmissionWrap", cfg.showTransmission);
+  const mileageLabelEl = document.getElementById(prefix + "MileageLabel");
+  if (mileageLabelEl) mileageLabelEl.textContent = cfg.mileageLabel;
+  const makeWrap = document.getElementById(prefix + "MakeWrap");
+  const makeInput = makeWrap && makeWrap.querySelector("input[name=make]");
+  if (makeInput) makeInput.required = !!(cfg.showMake && cfg.requireMake);
+  const modelDatalist = document.getElementById("modelPresetsList_" + prefix);
+  if (modelDatalist) modelDatalist.innerHTML = (cfg.modelPresets || []).map((m) => `<option value="${m}">`).join("");
+  renderFeatureCheckboxes(prefix + "FeaturesChecklist", selectedFeatures, category);
+}
+document.getElementById("adminAddCategorySelect").addEventListener("change", (e) => applyCategoryFieldsToForm(e.target.value, "adminAdd"));
+document.getElementById("adminEditCategorySelect").addEventListener("change", (e) => applyCategoryFieldsToForm(e.target.value, "adminEdit"));
+
+// ---- Specs tab: pick a category, edit its field setup + checklist ----
+const CATEGORY_TAB_LABELS = { vehicles: "Vehicles", trailers: "Trailers", caravans: "Caravans", bikes: "Bikes", boats: "Boats" };
+const CATEGORY_SINGULAR = { vehicles: "Vehicle", trailers: "Trailer", caravans: "Caravan", bikes: "Bike", boats: "Boat" };
+let currentSpecsCategory = "vehicles";
+function switchSpecsCategory(category) {
+  currentSpecsCategory = category;
+  document.querySelectorAll("#specsCategoryTabs [data-spec-cat]").forEach((btn) => {
+    btn.classList.toggle("btn-dark", btn.dataset.specCat === category);
+    btn.classList.toggle("btn", btn.dataset.specCat !== category);
+  });
+  ["specsCatLabel1", "specsCatLabel2"].forEach((id) => { document.getElementById(id).textContent = CATEGORY_TAB_LABELS[category]; });
+  document.getElementById("specsCatLabel3").textContent = CATEGORY_SINGULAR[category];
+  document.getElementById("specsCatLabel4").textContent = CATEGORY_SINGULAR[category];
+  const cfg = fieldsConfigFor(category);
+  document.getElementById("cfgShowMake").checked = cfg.showMake;
+  document.getElementById("cfgRequireMake").checked = cfg.requireMake;
+  document.getElementById("cfgShowMileage").checked = cfg.showMileage;
+  document.getElementById("cfgMileageLabel").value = cfg.mileageLabel;
+  document.getElementById("cfgShowFuel").checked = cfg.showFuel;
+  document.getElementById("cfgShowTransmission").checked = cfg.showTransmission;
+  renderSpecsList();
+  renderModelPresetsList();
+}
+async function saveCategoryFieldsConfig() {
+  const cfg = {
+    showMake: document.getElementById("cfgShowMake").checked,
+    requireMake: document.getElementById("cfgRequireMake").checked,
+    showMileage: document.getElementById("cfgShowMileage").checked,
+    mileageLabel: document.getElementById("cfgMileageLabel").value.trim() || "Mileage (km)",
+    showFuel: document.getElementById("cfgShowFuel").checked,
+    showTransmission: document.getElementById("cfgShowTransmission").checked,
+    modelPresets: fieldsConfigFor(currentSpecsCategory).modelPresets,
+  };
+  try {
+    await db.collection("settings").doc("categoryFields").set({ [currentSpecsCategory]: cfg }, { merge: true });
+  } catch (err) {
+    alert("Couldn't save that: " + err.message);
+  }
+}
+
+function renderModelPresetsList() {
+  const box = document.getElementById("modelPresetsList");
+  if (!box) return;
+  const list = fieldsConfigFor(currentSpecsCategory).modelPresets || [];
+  box.innerHTML = list.length
+    ? list.map((m) => `<span class="spec-chip">${m}<button type="button" onclick="removeModelPreset('${m.replace(/'/g, "\\'")}')" title="Remove">&times;</button></span>`).join("")
+    : '<div style="font-size:13px;color:var(--steel);">No presets added — Model stays a free-text field for this category.</div>';
+}
+async function submitAddModelPreset(event) {
+  event.preventDefault();
+  const form = event.target;
+  const name = form.presetName.value.trim();
+  if (!name) return false;
+  const current = fieldsConfigFor(currentSpecsCategory).modelPresets || [];
+  if (current.includes(name)) { form.reset(); return false; }
+  try {
+    await db.collection("settings").doc("categoryFields").set({
+      [currentSpecsCategory]: { modelPresets: [...current, name] },
+    }, { merge: true });
+    form.reset();
+  } catch (err) {
+    alert("Couldn't add that: " + err.message);
+  }
+  return false;
+}
+async function removeModelPreset(name) {
+  const current = fieldsConfigFor(currentSpecsCategory).modelPresets || [];
+  try {
+    await db.collection("settings").doc("categoryFields").set({
+      [currentSpecsCategory]: { modelPresets: current.filter((m) => m !== name) },
+    }, { merge: true });
+  } catch (err) {
+    alert("Couldn't remove that: " + err.message);
+  }
+}
+
+function renderSpecsList() {
+  const box = document.getElementById("specsList");
+  if (!box) return;
+  const list = window.categoryFeaturesLists[currentSpecsCategory] || [];
+  box.innerHTML = list.length
+    ? list.map((f) => `<span class="spec-chip">${f}<button type="button" onclick="removeSpec('${f.replace(/'/g, "\\'")}')" title="Remove">&times;</button></span>`).join("")
+    : '<div style="font-size:13px;color:var(--steel);">No specs added yet — add your first one below.</div>';
+}
+async function submitAddSpec(event) {
+  event.preventDefault();
+  const form = event.target;
+  const name = form.specName.value.trim();
+  if (!name) return false;
+  if ((window.categoryFeaturesLists[currentSpecsCategory] || []).includes(name)) { form.reset(); return false; }
+  try {
+    await db.collection("settings").doc(featuresDocId(currentSpecsCategory)).set({
+      list: firebase.firestore.FieldValue.arrayUnion(name),
+    }, { merge: true });
+    form.reset();
+  } catch (err) {
+    alert("Couldn't add that: " + err.message);
+  }
+  return false;
+}
+async function removeSpec(name) {
+  if (!confirm(`Remove "${name}" from the checklist? Listings that already have it ticked keep it — this only affects new selections.`)) return;
+  try {
+    await db.collection("settings").doc(featuresDocId(currentSpecsCategory)).update({
+      list: firebase.firestore.FieldValue.arrayRemove(name),
+    });
+  } catch (err) {
+    alert("Couldn't remove that: " + err.message);
+  }
+}
+
+
+function populateDealerChoiceDropdown(selectId, keepValue) {
+  const sel = document.getElementById(selectId || "dealerChoiceSelect");
+  if (!sel) return;
+  const current = keepValue !== undefined ? keepValue : sel.value;
+  const approved = (window.dealersCache || []).filter((d) => d.status === "approved");
+  // Showing a bit of the ID matters here — two dealers can share the same
+  // display name (e.g. duplicate test signups), and without this you'd have
+  // no way to tell which one you're actually picking.
+  sel.innerHTML = '<option value="">ZA Auto Link (no specific dealer)</option>' +
+    approved.map((d) => `<option value="${d.id}">${d.name} (${d.id.slice(0, 6)})</option>`).join("");
+  if (approved.some((d) => d.id === current)) sel.value = current;
+}
+function onDealerChoiceChange() {
+  const sel = document.getElementById("dealerChoiceSelect");
+  const dealer = (window.dealersCache || []).find((d) => d.id === sel.value);
+  document.getElementById("adminVehicleLocation").value = dealer ? (dealer.location || "") : "";
+}
+function onEditDealerChoiceChange() {
+  const sel = document.getElementById("editDealerChoiceSelect");
+  const dealer = (window.dealersCache || []).find((d) => d.id === sel.value);
+  document.getElementById("editVehicleForm").location.value = dealer ? (dealer.location || "") : "";
+}
+
+function startListeners() {
+  // Activity log — most recent 100 entries
+  unsubs.push(db.collection("activityLog").orderBy("createdAt", "desc").limit(100).onSnapshot((snap) => {
+    const list = document.getElementById("activityLogList");
+    if (snap.empty) { list.innerHTML = '<div class="empty">No activity recorded yet.</div>'; return; }
+    list.innerHTML = snap.docs.map((d) => {
+      const a = d.data();
+      const when = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().toLocaleString("en-ZA") : "Just now";
+      return `<div class="card" style="padding:12px 16px;">
+        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+          <div style="font-size:13px;color:var(--navy);"><strong>${a.actorEmail}</strong> ${a.action}</div>
+          <div style="font-size:12px;color:var(--steel);white-space:nowrap;">${when}</div>
+        </div>
+        ${a.detail ? `<div style="font-size:12px;color:var(--steel);margin-top:4px;">${a.detail}</div>` : ""}
+      </div>`;
+    }).join("");
+  }));
+
+  // Per-category specs checklists + field setup (shared across dealer + admin forms)
+  ["vehicles", "trailers", "caravans", "bikes", "boats"].forEach((cat) => {
+    unsubs.push(db.collection("settings").doc(featuresDocId(cat)).onSnapshot((doc) => {
+      window.categoryFeaturesLists[cat] = (doc.exists && doc.data().list) || [];
+      if (cat === currentSpecsCategory) renderSpecsList();
+      renderFeatureCheckboxes("adminAddFeaturesChecklist", null, document.getElementById("adminAddCategorySelect").value);
+    }, () => { window.categoryFeaturesLists[cat] = []; }));
+  });
+  unsubs.push(db.collection("settings").doc("categoryFields").onSnapshot((doc) => {
+    window.categoryFieldsConfig = (doc.exists && doc.data()) || {};
+    applyCategoryFieldsToForm(document.getElementById("adminAddCategorySelect").value, "adminAdd");
+    if (document.getElementById("specsCategoryTabs")) switchSpecsCategory(currentSpecsCategory);
+  }, () => { window.categoryFieldsConfig = {}; }));
+
+  // Dealers
+  window.dealersCache = [];
+  unsubs.push(db.collection("dealers").orderBy("createdAt", "desc").onSnapshot((snap) => {
+    window.dealersCache = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    populateDealerChoiceDropdown("dealerChoiceSelect");
+    populateDealerChoiceDropdown("editDealerChoiceSelect");
+    const pending = snap.docs.filter((d) => d.data().status === "pending").length;
+    setCount("dealers", pending);
+
+    // Two dealers sharing a name look identical everywhere in this dashboard
+    // (dropdowns, cards) — flag it so it never causes a silent mix-up.
+    const nameCounts = {};
+    window.dealersCache.forEach((d) => { nameCounts[d.name] = (nameCounts[d.name] || 0) + 1; });
+    const duplicateNames = Object.keys(nameCounts).filter((n) => nameCounts[n] > 1);
+    const dupBox = document.getElementById("dealerDuplicateWarning");
+    dupBox.innerHTML = duplicateNames.length
+      ? `<div class="error-text" style="margin-bottom:14px;">&#9888; More than one dealer is named the same thing: ${duplicateNames.map((n) => `"${n}"`).join(", ")}. They look identical in dropdowns and vehicle lists — check the "login uid" under each below before reassigning any stock, or remove whichever one is a duplicate/test account.</div>`
+      : "";
+
+    const list = document.getElementById("dealersList");
+    if (snap.empty) { list.innerHTML = '<div class="empty">No dealer applications yet.</div>'; return; }
+    list.innerHTML = snap.docs.map((d) => {
+      const v = d.data();
+      return `<div class="card">
+        <div class="row-flex">
+          <div>
+            <div style="font-weight:800;color:var(--navy);font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">${v.name} <span class="status-badge status-${v.status}">${statusLabel(v.status)}</span>${dealerCategories(v).filter((c) => c !== "vehicles").map((c) => `<span class="rto-badge">${CATEGORY_LABELS[c] || c}</span>`).join("")}</div>
+            <div style="font-size:13px;color:var(--steel);margin-top:4px;">${v.contactPerson || ""} &middot; ${v.email || ""} &middot; ${v.phone || ""}</div>
+            ${v.location ? `<div style="font-size:13px;color:var(--steel);">${v.location}</div>` : ""}
+            <div style="font-size:11px;color:#9AA7B5;margin-top:2px;font-family:monospace;">login uid: ${d.id}</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">
+            ${v.status === "pending" ? `
+              <button class="btn btn-ok" onclick="updateDealer('${d.id}','approved')">Approve</button>
+              <button class="btn btn-danger" onclick="updateDealer('${d.id}','rejected')">Reject</button>
+            ` : ""}
+            <button class="btn btn-dark" onclick="openEditDealerModal('${d.id}')">Edit</button>
+            ${v.email ? `<button class="btn" style="background:transparent;color:var(--navy);border:1.5px solid var(--navy);" onclick="sendDealerPasswordReset('${v.email}','${(v.name || '').replace(/'/g, "\\'")}')">Send password reset</button>` : ""}
+            <button class="btn btn-danger" onclick="deleteDealerAdmin('${d.id}','${(v.name || '').replace(/'/g, "\\'")}')">Remove</button>
+          </div>
+        </div>
+      </div>`;
+    }).join("");
+  }));
+
+  // Vehicles
+  window.vehiclesCache = [];
+  unsubs.push(db.collection("vehicles").orderBy("createdAt", "desc").onSnapshot((snap) => {
+    window.vehiclesCache = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const liveVehicles = window.vehiclesCache.filter((v) => v.status !== "draft");
+    const draftVehicles = window.vehiclesCache.filter((v) => v.status === "draft");
+
+    const pending = liveVehicles.filter((v) => v.status === "pending").length;
+    setCount("vehicles", pending);
+    setCount("drafts", draftVehicles.length);
+
+    const mostViewedBox = document.getElementById("mostViewedBox");
+    const topViewed = liveVehicles.filter((v) => v.status === "approved" && v.views > 0)
+      .sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
+    if (topViewed.length === 0) {
+      mostViewedBox.classList.add("hidden");
+    } else {
+      mostViewedBox.classList.remove("hidden");
+      mostViewedBox.innerHTML = `
+        <div style="font-weight:800;color:var(--navy);font-size:14px;margin-bottom:10px;">&#128200; Most Viewed Right Now</div>
+        ${topViewed.map((v) => `
+          <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--line);">
+            <span>${v.year} ${v.make} ${v.model} <span style="color:var(--steel);">&middot; ${v.dealerName}</span></span>
+            <span class="views-badge">&#128065; ${v.views}</span>
+          </div>
+        `).join("")}
+      `;
+    }
+
+    const renderVehicleCard = (v) => {
+      const photos = (v.images || []).map((u, i) => `<img src="${cldOptimize(u, 200)}" onclick="openAdminLightbox('${v.id}', ${i})">`).join("");
+      return `<div class="card${v.featured ? " is-featured" : ""}">
+        <div class="row-flex">
+          <div>
+            <div style="font-weight:800;color:var(--navy);font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">${v.year} ${v.make} ${v.model} <span class="status-badge status-${v.status}">${statusLabel(v.status)}</span>${v.status === "approved" ? `<span class="views-badge">&#128065; ${v.views || 0}</span>` : ""}${v.featured ? `<span class="featured-badge">&#11088; Featured</span>` : ""}${v.priceDropActive ? `<span class="pricedrop-badge">&#128201; Price Drop</span>` : ""}${v.listingType === "rto" ? `<span class="rto-badge">&#128273; Rent to Own</span>` : ""}${v.category && v.category !== "vehicles" ? `<span class="rto-badge">${CATEGORY_LABELS[v.category] || v.category}</span>` : ""}</div>
+            <div style="font-size:13px;color:var(--steel);margin-top:4px;">${v.dealerName}${v.location ? " &middot; &#128205; " + v.location : ""} &middot; R ${Number(v.price).toLocaleString()} &middot; ${Number(v.mileage || 0).toLocaleString()} km &middot; ${v.fuel || ""}</div>
+            ${v.dealerUid ? `<div style="font-size:11px;color:#9AA7B5;margin-top:2px;font-family:monospace;">dealerUid: ${v.dealerUid}</div>` : `<div style="font-size:11px;color:var(--bad);margin-top:2px;">&#9888; No dealerUid set on this listing — it won't show in any dealer's portal.</div>`}
+            ${v.description ? `<div style="font-size:13px;color:#5A6B80;margin-top:4px;max-width:520px;">${v.description}</div>` : ""}
+            ${photos ? `<div class="photo-strip">${photos}</div>` : ""}
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;">
+            ${v.status === "pending" ? `
+              <button class="btn btn-ok" onclick="updateVehicle('${v.id}','approved')">Approve</button>
+              <button class="btn btn-danger" onclick="updateVehicle('${v.id}','rejected')">Reject</button>
+            ` : ""}
+            ${v.status === "draft" ? `<button class="btn btn-ok" onclick="publishDraft('${v.id}')">Publish now</button>` : ""}
+            ${v.status === "approved" ? `<button class="btn btn-ghost" onclick="updateVehicle('${v.id}','sold')">Mark as Sold</button>` : ""}
+            ${v.status === "sold" ? `<button class="btn btn-ok" onclick="updateVehicle('${v.id}','approved')">Mark as Available</button>` : ""}
+            ${v.status === "approved" ? `<button class="btn ${v.featured ? "btn-danger" : "btn-ok"}" onclick="toggleFeatured('${v.id}', ${!!v.featured})">${v.featured ? "Remove Feature" : "&#11088; Feature"}</button>` : ""}
+            <button class="btn btn-dark" onclick="openEditVehicleModal('${v.id}')">Edit</button>
+            <button class="btn btn-danger" onclick="deleteVehicleAdmin('${v.id}')">Delete</button>
+          </div>
+        </div>
+      </div>`;
+    };
+
+    // Vehicle Approvals — grouped by dealer, collapsible so it's easy to jump to one
+    const list = document.getElementById("vehiclesList");
+    if (liveVehicles.length === 0) {
+      list.innerHTML = '<div class="empty">No vehicles yet.</div>';
+    } else {
+      const groups = {};
+      liveVehicles.forEach((v) => {
+        const key = v.dealerName || "Unknown";
+        (groups[key] = groups[key] || []).push(v);
+      });
+      const dealerNames = Object.keys(groups).sort((a, b) => a.localeCompare(b));
+      list.innerHTML = dealerNames.map((name) => {
+        const hasPending = groups[name].some((v) => v.status === "pending");
+        return `
+        <details class="dealer-group${hasPending ? " has-pending" : ""}" ${hasPending ? "open" : ""}>
+          <summary class="dealer-group-header">
+            <span class="chevron">&#9656;</span>
+            <h3>${name}</h3>
+            <span class="count-pill">${groups[name].length}</span>
+            ${hasPending ? '<span class="pending-flag">&#9679; New listing waiting</span>' : ""}
+            <button class="btn btn-outline btn-sm" style="margin-left:auto;" onclick="event.preventDefault(); event.stopPropagation(); printDealerReport('${name.replace(/'/g, "\\'")}')">Print / Save PDF</button>
+          </summary>
+          <div class="dealer-group-body">
+            ${groups[name].map(renderVehicleCard).join("")}
+          </div>
+        </details>
+      `;
+      }).join("");
+    }
+
+    // Drafts tab
+    const draftsList = document.getElementById("draftsList");
+    draftsList.innerHTML = draftVehicles.length
+      ? draftVehicles.map(renderVehicleCard).join("")
+      : '<div class="empty">No drafts right now — vehicles you save as draft will show up here.</div>';
+  }));
+
+  // Sell requests
+  unsubs.push(db.collection("sellLeads").orderBy("createdAt", "desc").onSnapshot((snap) => {
+    setCount("sell", snap.docs.filter((d) => d.data().status === "new").length);
+    const list = document.getElementById("sellList");
+    if (snap.empty) { list.innerHTML = '<div class="empty">No sell requests yet.</div>'; return; }
+    list.innerHTML = snap.docs.map((d) => {
+      const v = d.data();
+      const settleColor = v.hasSettlement === "yes" ? "#FFF6E5" : "#F1F5F1";
+      const settleText = v.hasSettlement === "yes" ? `Settlement owing with <strong>${v.bank}</strong>${v.settlementAmount ? ` (~${v.settlementAmount})` : ""}` :
+        v.hasSettlement === "unsure" ? "Seller is unsure whether there's a settlement — confirm on the call" : "No outstanding settlement — vehicle is paid off";
+      return `<div class="card">
+        <div class="row-flex">
+          <div style="font-weight:800;color:var(--navy);font-size:15px;display:flex;align-items:center;gap:8px;">${v.year} ${v.make} ${v.model} <span class="status-badge status-${v.status}">${statusLabel(v.status)}</span></div>
+          <div style="display:flex;gap:6px;">
+            <a class="btn btn-dark" href="tel:${v.phone}">Call</a>
+            ${v.status === "new" ? `<button class="btn btn-ok" onclick="updateStatus('sellLeads','${d.id}','contacted')">Mark contacted</button>` : ""}
+            ${v.status === "contacted" ? `<button class="btn btn-ok" onclick="updateStatus('sellLeads','${d.id}','closed')">Mark closed</button>` : ""}
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--steel);margin-top:8px;">${v.name} &middot; ${v.phone} ${v.email ? "&middot; " + v.email : ""}</div>
+        <div style="font-size:13px;color:var(--steel);">${Number(v.mileage || 0).toLocaleString()} km &middot; Condition: ${v.condition}</div>
+        <div class="settlement-line" style="background:${settleColor};">&#128179; ${settleText}</div>
+        ${v.notes ? `<div style="font-size:13px;color:#5A6B80;margin-top:8px;">Notes: ${v.notes}</div>` : ""}
+      </div>`;
+    }).join("");
+  }));
+
+  // Buy requests / wanted
+  unsubs.push(db.collection("buyRequests").orderBy("createdAt", "desc").onSnapshot((snap) => {
+    setCount("wanted", snap.docs.filter((d) => d.data().status === "new").length);
+    const list = document.getElementById("wantedList");
+    if (snap.empty) { list.innerHTML = '<div class="empty">No buy requests yet.</div>'; return; }
+    list.innerHTML = snap.docs.map((d) => {
+      const v = d.data();
+      return `<div class="card">
+        <div class="row-flex">
+          <div style="font-weight:800;color:var(--navy);font-size:15px;display:flex;align-items:center;gap:8px;">${v.make} ${v.model || "(any model)"} <span class="status-badge status-${v.status}">${statusLabel(v.status)}</span></div>
+          <div style="display:flex;gap:6px;">
+            <a class="btn btn-dark" href="tel:${v.phone}">Call</a>
+            ${v.status === "new" ? `<button class="btn btn-ok" onclick="updateStatus('buyRequests','${d.id}','contacted')">Mark contacted</button>` : ""}
+            ${v.status === "contacted" ? `<button class="btn btn-ok" onclick="updateStatus('buyRequests','${d.id}','closed')">Mark closed</button>` : ""}
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--steel);margin-top:8px;">${v.name} &middot; ${v.phone} ${v.email ? "&middot; " + v.email : ""}</div>
+        <div style="font-size:13px;color:var(--steel);">${v.minYear ? v.minYear + " or newer" : "Any year"} &middot; ${v.maxBudget ? "Budget up to R " + Number(v.maxBudget).toLocaleString() : "No budget given"}</div>
+        ${v.notes ? `<div style="font-size:13px;color:#5A6B80;margin-top:8px;">Notes: ${v.notes}</div>` : ""}
+      </div>`;
+    }).join("");
+  }));
+
+  // Insurance leads
+  unsubs.push(db.collection("insuranceLeads").orderBy("createdAt", "desc").onSnapshot((snap) => {
+    setCount("insurance", snap.docs.filter((d) => d.data().status === "new").length);
+    const list = document.getElementById("insuranceList");
+    if (snap.empty) { list.innerHTML = '<div class="empty">No insurance leads yet.</div>'; return; }
+    list.innerHTML = snap.docs.map((d) => {
+      const v = d.data();
+      const insuredText = v.currentlyInsured === "yes"
+        ? `Currently insured with <strong>${v.currentInsurer || "unnamed insurer"}</strong>${v.currentPremium ? ` (~R${v.currentPremium}/mo)` : ""}`
+        : "Not currently insured";
+      return `<div class="card">
+        <div class="row-flex">
+          <div style="font-weight:800;color:var(--navy);font-size:15px;display:flex;align-items:center;gap:8px;">${v.year} ${v.make} ${v.model} <span class="status-badge status-${v.status}">${statusLabel(v.status)}</span></div>
+          <div style="display:flex;gap:6px;">
+            <a class="btn btn-dark" href="tel:${v.phone}">Call</a>
+            ${v.status === "new" ? `<button class="btn btn-ok" onclick="updateStatus('insuranceLeads','${d.id}','contacted')">Mark contacted</button>` : ""}
+            ${v.status === "contacted" ? `<button class="btn btn-ok" onclick="updateStatus('insuranceLeads','${d.id}','closed')">Mark closed</button>` : ""}
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--steel);margin-top:8px;">${v.name} &middot; ${v.phone} ${v.email ? "&middot; " + v.email : ""}</div>
+        <div style="font-size:13px;color:var(--steel);">${v.vehicleUse || ""} &middot; ${v.vehicleValue ? "Est. value R " + Number(v.vehicleValue).toLocaleString() : ""} &middot; ${v.recentClaims === "Yes" ? "Has recent claims" : "No recent claims"}</div>
+        <div class="settlement-line" style="background:${v.currentlyInsured === "yes" ? "#FFF6E5" : "#F1F5F1"};">&#128737; ${insuredText}</div>
+        ${v.drivingYears ? `<div style="font-size:13px;color:var(--steel);margin-top:4px;">${v.drivingYears} years driving experience &middot; Parked: ${v.overnightParking || "not specified"}</div>` : ""}
+        ${v.notes ? `<div style="font-size:13px;color:#5A6B80;margin-top:8px;">Notes: ${v.notes}</div>` : ""}
+      </div>`;
+    }).join("");
+  }));
+
+  // RTO requests (general callback requests, not tied to a specific vehicle)
+  unsubs.push(db.collection("rtoLeads").orderBy("createdAt", "desc").onSnapshot((snap) => {
+    setCount("rto", snap.docs.filter((d) => d.data().status === "new").length);
+    const list = document.getElementById("rtoList");
+    if (snap.empty) { list.innerHTML = '<div class="empty">No Rent-to-Own requests yet.</div>'; return; }
+    list.innerHTML = snap.docs.map((d) => {
+      const v = d.data();
+      return `<div class="card">
+        <div class="row-flex">
+          <div style="font-weight:800;color:var(--navy);font-size:15px;display:flex;align-items:center;gap:8px;">${v.name} <span class="status-badge status-${v.status}">${statusLabel(v.status)}</span></div>
+          <div style="display:flex;gap:6px;">
+            <a class="btn btn-dark" href="tel:${v.phone}">Call</a>
+            ${v.status === "new" ? `<button class="btn btn-ok" onclick="updateStatus('rtoLeads','${d.id}','contacted')">Mark contacted</button>` : ""}
+            ${v.status === "contacted" ? `<button class="btn btn-ok" onclick="updateStatus('rtoLeads','${d.id}','closed')">Mark closed</button>` : ""}
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--steel);margin-top:8px;">${v.phone} ${v.email ? "&middot; " + v.email : ""}${v.monthlyBudget ? " &middot; Budget ~R" + Number(v.monthlyBudget).toLocaleString() + "/mo" : ""}</div>
+        ${v.vehicleInterest ? `<div style="font-size:13px;color:var(--steel);">Looking for: ${v.vehicleInterest}</div>` : ""}
+        ${v.notes ? `<div style="font-size:13px;color:#5A6B80;margin-top:8px;">Notes: ${v.notes}</div>` : ""}
+      </div>`;
+    }).join("");
+  }));
+
+  // Enquiries
+  window.enquiriesCache = [];
+  unsubs.push(db.collection("enquiries").orderBy("createdAt", "desc").onSnapshot((snap) => {
+    setCount("enquiries", snap.docs.filter((d) => d.data().status === "new").length);
+    window.enquiriesCache = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    populateEnquiryDealerFilter();
+    renderEnquiriesList();
+  }));
+
+function populateEnquiryDealerFilter() {
+  const sel = document.getElementById("enquiryDealerFilter");
+  if (!sel) return;
+  const current = sel.value;
+  const names = [...new Set((window.enquiriesCache || []).map((e) => e.dealerName).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">All dealers</option>' + names.map((n) => `<option value="${n}">${n}</option>`).join("");
+  if (names.includes(current)) sel.value = current;
+}
+function renderEnquiriesList() {
+  const list = document.getElementById("enquiriesList");
+  if (!list) return;
+  const dealerFilter = document.getElementById("enquiryDealerFilter").value;
+  const q = (document.getElementById("enquirySearch").value || "").toLowerCase();
+  const filtered = (window.enquiriesCache || [])
+    .filter((v) => !dealerFilter || v.dealerName === dealerFilter)
+    .filter((v) => !q || `${v.name} ${v.phone} ${v.vehicleName}`.toLowerCase().includes(q));
+  if (filtered.length === 0) { list.innerHTML = '<div class="empty">No buyer enquiries match.</div>'; return; }
+  list.innerHTML = filtered.map((v) => {
+    const when = v.createdAt && v.createdAt.toDate ? v.createdAt.toDate().toLocaleString("en-ZA", { dateStyle: "medium", timeStyle: "short" }) : "Just now";
+    return `<div class="card">
+      <div class="row-flex">
+        <div style="font-weight:800;color:var(--navy);font-size:15px;">${v.vehicleName}</div>
+        <span class="status-badge status-${v.status}">${statusLabel(v.status)}</span>
+      </div>
+      <div style="font-size:12px;color:var(--steel);margin-top:2px;">${when}</div>
+      ${v.dealerName ? `<div style="font-size:12px;color:var(--ok);font-weight:700;margin-top:4px;">&#10003; Routed to ${v.dealerName}'s portal</div>` : `<div style="font-size:12px;color:var(--warn);margin-top:4px;">No dealer on file for this vehicle — follow up yourself.</div>`}
+      <div style="font-size:13px;color:var(--steel);margin-top:6px;">${v.name} &middot; ${v.phone} &middot; prefers ${v.preferredContact}</div>
+      ${v.message ? `<div style="font-size:13px;color:#5A6B80;margin-top:8px;">&ldquo;${v.message}&rdquo;</div>` : ""}
+      <div style="display:flex;gap:6px;margin-top:10px;">
+        <a class="btn btn-dark" href="tel:${v.phone}">Call</a>
+        ${v.status === "new" ? `<button class="btn btn-ok" onclick="updateStatus('enquiries','${v.id}','contacted')">Mark dealer notified</button>` : ""}
+        ${v.status === "contacted" ? `<button class="btn btn-ok" onclick="updateStatus('enquiries','${v.id}','closed')">Mark closed</button>` : ""}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+
+  // Dealer sourcing requests
+  unsubs.push(db.collection("dealerRequests").orderBy("createdAt", "desc").onSnapshot((snap) => {
+    setCount("dealerrequests", snap.docs.filter((d) => d.data().status === "new").length);
+    const list = document.getElementById("dealerRequestsList");
+    if (snap.empty) { list.innerHTML = '<div class="empty">No dealer sourcing requests yet.</div>'; return; }
+    list.innerHTML = snap.docs.map((d) => {
+      const r = d.data();
+      return `<div class="card">
+        <div class="row-flex">
+          <div style="font-weight:800;color:var(--navy);font-size:15px;display:flex;align-items:center;gap:8px;">${r.dealerName} wants ${r.make || "Any make"} ${r.model || ""} <span class="status-badge status-${r.status}">${statusLabel(r.status)}</span></div>
+          <div style="display:flex;gap:6px;">
+            ${r.status === "new" ? `<button class="btn btn-ok" onclick="updateStatus('dealerRequests','${d.id}','contacted')">Mark contacted</button>` : ""}
+            ${r.status === "contacted" ? `<button class="btn btn-ok" onclick="updateStatus('dealerRequests','${d.id}','closed')">Mark closed</button>` : ""}
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--steel);margin-top:8px;">${r.minYear ? r.minYear + " or newer" : "Any year"} &middot; ${r.maxBudget ? "Budget up to R " + Number(r.maxBudget).toLocaleString() : "No budget given"}${r.quantity && r.quantity > 1 ? " &middot; Qty " + r.quantity : ""}</div>
+        ${r.notes ? `<div style="font-size:13px;color:#5A6B80;margin-top:8px;">Notes: ${r.notes}</div>` : ""}
+      </div>`;
+    }).join("");
+  }));
+
+  unsubs.push(db.collection("banners").orderBy("createdAt", "desc").onSnapshot((snap) => {
+    setCount("banners", snap.docs.filter((d) => !d.data().approved).length);
+    const list = document.getElementById("bannersList");
+    if (!list) return;
+    if (snap.empty) { list.innerHTML = '<div class="empty">No banners yet — add one above.</div>'; return; }
+    const SLOT_NAMES = { 1: "Homepage top", 2: "Browse Vehicles top", 3: "Rent to Own top", 4: "Site footer" };
+    list.innerHTML = snap.docs.map((d) => {
+      const b = d.data();
+      const st = bannerStatus(b);
+      return `<div class="card" style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;">
+        <img src="${b.imageUrl}" style="width:140px;height:70px;object-fit:cover;border-radius:8px;flex-shrink:0;">
+        <div style="flex:1;min-width:180px;">
+          <div style="font-weight:800;color:var(--navy);font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            ${b.advertiserName} <span class="status-badge ${st.cls}">${st.label}</span>
+          </div>
+          <div style="font-size:13px;color:var(--steel);margin-top:4px;">Slot ${b.slot} — ${SLOT_NAMES[b.slot] || ""}${b.contactInfo ? " &middot; " + b.contactInfo : ""}</div>
+          <div style="font-size:13px;color:var(--steel);">${b.startDate} &rarr; ${b.endDate}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${!b.approved ? `<button class="btn btn-ok" onclick="approveBanner('${d.id}')">Approve (paid)</button>` : ""}
+          <button class="btn" style="background:transparent;color:var(--bad);border:1.5px solid var(--bad);" onclick="deleteBanner('${d.id}')">Delete</button>
+        </div>
+      </div>`;
+    }).join("");
+  }));
+
+  unsubs.push(db.collection("settings").doc("adPricing").onSnapshot((doc) => {
+    window.adPricingList = (doc.exists && doc.data().list) || [];
+    renderAdPricingListAdmin();
+  }, () => { window.adPricingList = []; renderAdPricingListAdmin(); }));
+}
+
+function updateDealer(id, status) {
+  const d = (window.dealersCache || []).find((x) => x.id === id);
+  db.collection("dealers").doc(id).update({ status });
+  logActivity(`${status} dealer application`, d ? d.name : id);
+}
+async function deleteDealerAdmin(id, name) {
+  if (!confirm(`Remove ${name || "this dealer"} completely? They'll lose access to the dealer portal. Their existing vehicle listings won't be deleted automatically — remove those separately from Vehicle Approvals if needed.`)) return;
+  try {
+    await db.collection("dealers").doc(id).delete();
+    logActivity("removed dealer", name || id);
+  } catch (err) {
+    alert("Couldn't remove that dealer: " + err.message);
+  }
+}
+
+// Lets you help a locked-out dealer without ever seeing or handling their
+// password yourself — Firebase emails them a secure reset link directly.
+async function sendDealerPasswordReset(email, name) {
+  if (!confirm(`Send a password reset email to ${name || "this dealer"} at ${email}?`)) return;
+  try {
+    await firebase.auth().sendPasswordResetEmail(email);
+    alert(`Reset email sent to ${email}. Ask them to check their inbox (and spam folder).`);
+    logActivity("sent password reset", `${name || ""} (${email})`);
+  } catch (err) {
+    alert("Couldn't send that: " + err.message);
+  }
+}
+
+// ---- Edit dealer (fix a typo in their application) ----
+let editingDealerId = null;
+// Backward-compatible: dealers approved before the multi-category update only
+// have `offersRTO`, not a `categories` array — treat them as selling vehicles
+// (+ rto if ticked) until this modal is used to update them.
+const CATEGORY_LABELS = { rto: "&#128273; Rent to Own", trailers: "&#128665; Trailers", caravans: "&#127968; Caravans", bikes: "&#127949; Bikes", boats: "&#9973; Boats" };
+function dealerCategories(dealer) {
+  if (dealer && dealer.categories && dealer.categories.length) return dealer.categories;
+  return ["vehicles"].concat(dealer && dealer.offersRTO ? ["rto"] : []);
+}
+function openEditDealerModal(id) {
+  const d = (window.dealersCache || []).find((x) => x.id === id);
+  if (!d) return;
+  editingDealerId = id;
+  const form = document.getElementById("editDealerForm");
+  form.name.value = d.name || "";
+  form.contactPerson.value = d.contactPerson || "";
+  form.phone.value = d.phone || "";
+  form.email.value = d.email || "";
+  form.location.value = d.location || "";
+  form.whatsappNumber.value = d.whatsappNumber || "";
+  form.whatsappApiKey.value = d.whatsappApiKey || "";
+  const cats = dealerCategories(d);
+  ["vehicles", "rto", "trailers", "caravans", "bikes", "boats"].forEach((c) => {
+    form["cat_" + c].checked = cats.includes(c);
+  });
+  document.getElementById("editDealerError").innerHTML = "";
+  document.getElementById("editDealerModal").style.display = "flex";
+}
+function closeEditDealerModal() { document.getElementById("editDealerModal").style.display = "none"; }
+document.getElementById("editDealerModal").addEventListener("click", (e) => { if (e.target.id === "editDealerModal") closeEditDealerModal(); });
+
+async function submitEditDealer(event) {
+  event.preventDefault();
+  const form = event.target;
+  const data = Object.fromEntries(new FormData(form).entries());
+  const errorBox = document.getElementById("editDealerError");
+  errorBox.innerHTML = "";
+  const button = form.querySelector("button[type=submit]");
+  const label = button.querySelector(".btn-label");
+  const original = label.textContent;
+  label.textContent = "Saving...";
+  button.disabled = true;
+  try {
+    const categories = ["vehicles", "rto", "trailers", "caravans", "bikes", "boats"].filter((c) => data["cat_" + c]);
+    await db.collection("dealers").doc(editingDealerId).update({
+      name: data.name, contactPerson: data.contactPerson, phone: data.phone, email: data.email, location: data.location || "",
+      whatsappNumber: (data.whatsappNumber || "").replace(/[^0-9]/g, ""), whatsappApiKey: data.whatsappApiKey || "",
+      categories: categories.length ? categories : ["vehicles"],
+      offersRTO: categories.includes("rto"),
+    });
+    // Keep their existing vehicles' cached dealer name in sync, so grouping stays accurate.
+    const theirVehicles = await db.collection("vehicles").where("dealerUid", "==", editingDealerId).get();
+    if (!theirVehicles.empty) {
+      const batch = db.batch();
+      theirVehicles.forEach((doc) => batch.update(doc.ref, { dealerName: data.name }));
+      await batch.commit();
+    }
+    closeEditDealerModal();
+    logActivity("edited dealer details for", data.name);
+  } catch (err) {
+    errorBox.innerHTML = `<div class="error-text">${err.message}</div>`;
+  } finally {
+    label.textContent = original;
+    button.disabled = false;
+  }
+  return false;
+}
+
+function updateVehicle(id, status) {
+  const v = (window.vehiclesCache || []).find((x) => x.id === id);
+  const label = v ? `${v.year} ${v.make} ${v.model}` : id;
+  db.collection("vehicles").doc(id).update({ status });
+  logActivity(`marked vehicle as ${status}`, label);
+}
+function toggleFeatured(id, currentlyFeatured) {
+  const v = (window.vehiclesCache || []).find((x) => x.id === id);
+  const label = v ? `${v.year} ${v.make} ${v.model}` : id;
+  db.collection("vehicles").doc(id).update({ featured: !currentlyFeatured });
+  logActivity(currentlyFeatured ? "removed Featured from" : "marked Featured", label);
+}
+async function publishDraft(id) {
+  const v = (window.vehiclesCache || []).find((x) => x.id === id);
+  const updates = { status: "approved" };
+  // If this draft was earmarked for a specific dealer, attribute it to them properly now.
+  if (v && v.intendedDealerUid) {
+    updates.dealerUid = v.intendedDealerUid;
+    updates.dealerId = v.intendedDealerUid;
+  }
+  try {
+    await db.collection("vehicles").doc(id).update(updates);
+    logActivity("published draft vehicle", v ? `${v.year} ${v.make} ${v.model}` : id);
+  } catch (err) {
+    alert("Couldn't publish that: " + err.message);
+  }
+}
+
+// ---- Print / Save PDF: a clean summary of one dealer's vehicles and their status ----
+function printDealerReport(dealerName) {
+  const vehicles = (window.vehiclesCache || []).filter((v) => (v.dealerName || "Unknown") === dealerName && v.status !== "draft");
+  const rows = vehicles.map((v) => `
+    <tr>
+      <td>${v.year} ${v.make} ${v.model}</td>
+      <td>${v.location || "-"}</td>
+      <td>R ${Number(v.price).toLocaleString()}</td>
+      <td class="status-${v.status}">${statusLabel(v.status)}</td>
+    </tr>`).join("");
+  const generatedDate = new Date().toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric" });
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${dealerName} — Vehicle Listing Summary</title>
+    <style>
+      body { font-family: system-ui, -apple-system, sans-serif; padding: 36px; color: #0B1F3A; }
+      h1 { font-size: 20px; margin: 0 0 4px; }
+      .sub { color: #3D4C63; font-size: 13px; margin-bottom: 24px; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid #E3E1DA; font-size: 13px; }
+      th { background: #F6F5F2; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px; color: #3D4C63; }
+      .status-approved { color: #1E8E5A; font-weight: 700; }
+      .status-sold { color: #3D4C63; font-weight: 700; }
+      .status-pending { color: #C98A00; font-weight: 700; }
+      .status-rejected { color: #C0392B; font-weight: 700; }
+      @media print { body { padding: 0; } }
+    </style>
+  </head><body>
+    <h1>${dealerName} — Vehicle Listing Summary</h1>
+    <div class="sub">ZA Auto Link &middot; Generated ${generatedDate}</div>
+    <table>
+      <thead><tr><th>Vehicle</th><th>Location</th><th>Price</th><th>Status</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="4">No vehicles found for this dealer.</td></tr>'}</tbody>
+    </table>
+  </body></html>`;
+  const win = window.open("", "_blank");
+  if (!win) { alert("Please allow pop-ups to print or save this as a PDF."); return; }
+  win.document.write(html);
+  win.document.close();
+  win.onload = () => win.print();
+}
+function updateStatus(collection, id, status) { db.collection(collection).doc(id).update({ status }); }
+
+// ---- Lightbox slideshow (review all photos for a vehicle) ----
+let lightboxImages = [];
+let lightboxIndex = 0;
+function openAdminLightbox(vehicleId, index) {
+  const v = (window.vehiclesCache || []).find((x) => x.id === vehicleId);
+  if (!v) return;
+  lightboxImages = v.images || [];
+  lightboxIndex = index;
+  renderLightbox();
+  document.getElementById("lightboxModal").classList.add("open");
+}
+function renderLightbox() {
+  if (!lightboxImages.length) return;
+  document.getElementById("lightboxImage").src = cldOptimize(lightboxImages[lightboxIndex], 1400);
+  document.getElementById("lightboxCounter").textContent = `${lightboxIndex + 1} / ${lightboxImages.length}`;
+  const multi = lightboxImages.length > 1;
+  document.getElementById("lightboxPrev").style.display = multi ? "flex" : "none";
+  document.getElementById("lightboxNext").style.display = multi ? "flex" : "none";
+}
+function lightboxNext() { lightboxIndex = (lightboxIndex + 1) % lightboxImages.length; renderLightbox(); }
+function lightboxPrev() { lightboxIndex = (lightboxIndex - 1 + lightboxImages.length) % lightboxImages.length; renderLightbox(); }
+function closeLightbox() { document.getElementById("lightboxModal").classList.remove("open"); }
+document.getElementById("lightboxModal").addEventListener("click", (e) => { if (e.target.id === "lightboxModal") closeLightbox(); });
+document.addEventListener("keydown", (e) => {
+  if (!document.getElementById("lightboxModal").classList.contains("open")) return;
+  if (e.key === "ArrowRight") lightboxNext();
+  if (e.key === "ArrowLeft") lightboxPrev();
+  if (e.key === "Escape") closeLightbox();
+});
+
+async function deleteVehicleAdmin(id) {
+  const v = (window.vehiclesCache || []).find((x) => x.id === id);
+  const label = v ? `${v.year} ${v.make} ${v.model}` : id;
+  if (!confirm("Delete this vehicle permanently? This can't be undone.")) return;
+  try {
+    await db.collection("vehicles").doc(id).delete();
+    logActivity("deleted vehicle", label);
+  } catch (err) {
+    alert("Couldn't delete that: " + err.message);
+  }
+}
+
+// ---- Edit vehicle (admin — no re-approval needed, admin decides directly) ----
+let editingVehicleId = null;
+let editPhotos = []; // ordered list of { url } for existing photos or { file } for new ones — index 0 is the cover
+
+function openEditVehicleModal(id) {
+  const v = (window.vehiclesCache || []).find((x) => x.id === id);
+  if (!v) return;
+  editingVehicleId = id;
+  editPhotos = (v.images || []).map((u) => ({ url: u }));
+  const form = document.getElementById("editVehicleForm");
+  // For a draft, the "real" dealer it's earmarked for is intendedDealerUid, not dealerUid yet.
+  const currentDealerUid = v.status === "draft" ? (v.intendedDealerUid || "") : (v.dealerUid || "");
+  populateDealerChoiceDropdown("editDealerChoiceSelect", currentDealerUid);
+  form.make.value = v.make || "";
+  form.model.value = v.model || "";
+  form.location.value = v.location || "";
+  form.year.value = v.year || "";
+  form.mileage.value = v.mileage || "";
+  form.price.value = v.price || "";
+  form.condition.value = v.condition || "Used";
+  form.fuel.value = v.fuel || "Petrol";
+  form.transmission.value = v.transmission || "Manual";
+  form.description.value = v.description || "";
+  form.listingType.value = v.listingType === "rto" ? "rto" : "sale";
+  form.category.value = v.category || "vehicles";
+  document.getElementById("editVehicleError").innerHTML = "";
+  document.getElementById("editPriceDropCheckbox").checked = !!v.priceDropActive;
+  document.getElementById("editOriginalPriceInput").value = v.originalPrice || "";
+  document.getElementById("editOriginalPriceWrap").classList.toggle("hidden", !v.priceDropActive);
+  applyCategoryFieldsToForm(v.category || "vehicles", "adminEdit", v.features || []);
+  renderEditPhotoPreview();
+  document.getElementById("editVehicleModal").style.display = "flex";
+}
+function onEditPriceDropToggle() {
+  document.getElementById("editOriginalPriceWrap").classList.toggle("hidden", !document.getElementById("editPriceDropCheckbox").checked);
+}
+function closeEditVehicleModal() { document.getElementById("editVehicleModal").style.display = "none"; }
+document.getElementById("editVehicleModal").addEventListener("click", (e) => { if (e.target.id === "editVehicleModal") closeEditVehicleModal(); });
+
+// Same fallback used on the public site: some pickers hand over files with a
+// blank `type` even though they're real photos, and iPhones shoot HEIC by
+// default which Cloudinary's free preset often won't accept — so we detect
+// and convert HEIC to JPEG client-side (via Safari's own HEIC decoding)
+// before it ever reaches Cloudinary.
+const IMAGE_EXTENSIONS = /\.(jpe?g|png|gif|webp|heic|heif|bmp|tiff?)$/i;
+function isLikelyImageFile(f) {
+  if (f.type && f.type.startsWith("image/")) return true;
+  if (!f.type && IMAGE_EXTENSIONS.test(f.name || "")) return true;
+  return false;
+}
+function isHeicFile(f) {
+  const type = (f.type || "").toLowerCase();
+  return type === "image/heic" || type === "image/heif" || /\.hei[cf]$/i.test(f.name || "");
+}
+function convertHeicToJpeg(file) {
+  return new Promise((resolve) => {
+    try {
+      const objectUrl = URL.createObjectURL(file);
+      const img = new Image();
+      const cleanup = () => URL.revokeObjectURL(objectUrl);
+      img.onload = () => {
+        try {
+          const maxDim = 1800;
+          const scale = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.round(img.naturalWidth * scale);
+          canvas.height = Math.round(img.naturalHeight * scale);
+          canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob((blob) => {
+            cleanup();
+            if (!blob) return resolve(file);
+            resolve(new File([blob], file.name.replace(/\.hei[cf]$/i, "") + ".jpg", { type: "image/jpeg" }));
+          }, "image/jpeg", 0.88);
+        } catch { cleanup(); resolve(file); }
+      };
+      img.onerror = () => { cleanup(); resolve(file); };
+      img.src = objectUrl;
+    } catch { resolve(file); }
+  });
+}
+
+async function handleEditPhotoSelect(event) {
+  const files = Array.from(event.target.files || []);
+  event.target.value = "";
+  if (files.length === 0) { alert("No photos came through — if they're recent iCloud photos, make sure they're fully downloaded first, or try taking a new photo."); return; }
+  for (const f of files) {
+    if (editPhotos.length >= 8) break;
+    if (!isLikelyImageFile(f)) continue;
+    editPhotos.push({ file: isHeicFile(f) ? await convertHeicToJpeg(f) : f });
+  }
+  renderEditPhotoPreview();
+}
+function removeEditPhoto(i) { editPhotos.splice(i, 1); renderEditPhotoPreview(); }
+function setEditCoverPhoto(i) {
+  const [item] = editPhotos.splice(i, 1);
+  editPhotos.unshift(item);
+  renderEditPhotoPreview();
+}
+function renderEditPhotoPreview() {
+  const grid = document.getElementById("editPhotoPreviewGrid");
+  grid.innerHTML = editPhotos.map((p, i) => {
+    const src = p.url ? cldOptimize(p.url, 200) : URL.createObjectURL(p.file);
+    return `<div class="photo-thumb">
+      <img src="${src}">
+      <button type="button" onclick="event.stopPropagation(); removeEditPhoto(${i})">&times;</button>
+      ${i === 0 ? '<div class="cover-badge">Cover photo</div>' : `<button type="button" class="cover-btn" title="Set as cover photo" onclick="event.stopPropagation(); setEditCoverPhoto(${i})">&#9733;</button>`}
+    </div>`;
+  }).join("");
+}
+
+async function submitEditVehicle(event) {
+  event.preventDefault();
+  const form = event.target;
+  const data = Object.fromEntries(new FormData(form).entries());
+  const errorBox = document.getElementById("editVehicleError");
+  errorBox.innerHTML = "";
+  if (editPhotos.length === 0) { errorBox.innerHTML = '<div class="error-text">Keep at least 1 photo.</div>'; return false; }
+  if (document.getElementById("editPriceDropCheckbox").checked) {
+    const origVal = Number(document.getElementById("editOriginalPriceInput").value || 0);
+    const newVal = Number(data.price || 0);
+    if (origVal <= newVal) {
+      errorBox.innerHTML = '<div class="error-text">Original price must be higher than the current price for a price drop to make sense.</div>';
+      return false;
+    }
+  }
+  const button = form.querySelector("button[type=submit]");
+  const label = button.querySelector(".btn-label");
+  const original = label.textContent;
+  button.disabled = true;
+  try {
+    const finalImages = [];
+    for (let i = 0; i < editPhotos.length; i++) {
+      if (editPhotos[i].url) {
+        finalImages.push(editPhotos[i].url);
+      } else {
+        label.textContent = `Uploading photo ${i + 1} of ${editPhotos.length}...`;
+        finalImages.push(await uploadImageToCloudinary(editPhotos[i].file));
+      }
+    }
+    label.textContent = "Saving...";
+    const v = (window.vehiclesCache || []).find((x) => x.id === editingVehicleId);
+    const selectedDealer = (window.dealersCache || []).find((d) => d.id === data.dealerChoice);
+    const priceDropActive = document.getElementById("editPriceDropCheckbox").checked;
+    const updates = {
+      make: data.make, model: data.model, location: data.location || "", year: Number(data.year), mileage: Number(data.mileage || 0),
+      price: Number(data.price), condition: data.condition, fuel: data.fuel, transmission: data.transmission,
+      description: data.description, features: getCheckedFeatures("adminEditFeaturesChecklist"), images: finalImages,
+      category: data.category || "vehicles",
+      listingType: data.listingType === "rto" ? "rto" : "sale",
+      dealerName: selectedDealer ? selectedDealer.name : "ZA Auto Link",
+      priceDropActive: priceDropActive,
+      originalPrice: priceDropActive ? Number(document.getElementById("editOriginalPriceInput").value || 0) : 0,
+    };
+    if (v && v.status === "draft") {
+      // Still a draft — keep it under the admin's own account, just update who it's earmarked for.
+      updates.intendedDealerUid = selectedDealer ? selectedDealer.id : "";
+    } else {
+      // Live vehicle — actually move it into the selected dealer's group.
+      const ownerUid = selectedDealer ? selectedDealer.id : auth.currentUser.uid;
+      updates.dealerUid = ownerUid;
+      updates.dealerId = ownerUid;
+    }
+    await db.collection("vehicles").doc(editingVehicleId).update(updates);
+    closeEditVehicleModal();
+    logActivity("edited vehicle", `${data.year} ${data.make} ${data.model}`);
+  } catch (err) {
+    errorBox.innerHTML = `<div class="error-text">${err.message}</div>`;
+  } finally {
+    label.textContent = original;
+    button.disabled = false;
+  }
+  return false;
+}
+
+// ---- Admin: add a vehicle directly, with device photo upload ----
+let adminPhotos = [];
+async function handleAdminPhotoSelect(event) {
+  const files = Array.from(event.target.files || []);
+  event.target.value = "";
+  if (files.length === 0) { alert("No photos came through — if they're recent iCloud photos, make sure they're fully downloaded first, or try taking a new photo."); return; }
+  for (const f of files) {
+    if (adminPhotos.length >= 8) break;
+    if (!isLikelyImageFile(f)) continue;
+    adminPhotos.push(isHeicFile(f) ? await convertHeicToJpeg(f) : f);
+  }
+  renderAdminPhotoPreview();
+}
+function removeAdminPhoto(i) { adminPhotos.splice(i, 1); renderAdminPhotoPreview(); }
+function setAdminCoverPhoto(i) {
+  const [item] = adminPhotos.splice(i, 1);
+  adminPhotos.unshift(item);
+  renderAdminPhotoPreview();
+}
+function renderAdminPhotoPreview() {
+  document.getElementById("adminPhotoPreviewGrid").innerHTML = adminPhotos.map((f, i) => `<div class="photo-thumb">
+    <img src="${URL.createObjectURL(f)}">
+    <button type="button" onclick="event.stopPropagation(); removeAdminPhoto(${i})">&times;</button>
+    ${i === 0 ? '<div class="cover-badge">Cover photo</div>' : `<button type="button" class="cover-btn" title="Set as cover photo" onclick="event.stopPropagation(); setAdminCoverPhoto(${i})">&#9733;</button>`}
+  </div>`).join("");
+}
+
+async function submitAdminVehicle(event) {
+  event.preventDefault();
+  const form = event.target;
+  const data = Object.fromEntries(new FormData(form).entries());
+  const errorBox = document.getElementById("adminVehicleError");
+  errorBox.innerHTML = "";
+  const button = form.querySelector("button[type=submit]");
+  const label = button.querySelector(".btn-label");
+  const original = label.textContent;
+  button.disabled = true;
+  try {
+    const uid = auth.currentUser.uid;
+    const vehicleRef = db.collection("vehicles").doc();
+    const imageUrls = [];
+    for (let i = 0; i < adminPhotos.length; i++) {
+      label.textContent = `Uploading photo ${i + 1} of ${adminPhotos.length}...`;
+      const url = await uploadImageToCloudinary(adminPhotos[i]);
+      imageUrls.push(url);
+    }
+    label.textContent = data.publishMode === "draft" ? "Saving draft..." : "Publishing...";
+
+    const selectedDealer = (window.dealersCache || []).find((d) => d.id === data.dealerChoice);
+    const isDraft = data.publishMode === "draft";
+    const dealerName = selectedDealer ? selectedDealer.name : "ZA Auto Link";
+
+    const docData = {
+      dealerName, location: data.location || "",
+      make: data.make, model: data.model, year: Number(data.year), mileage: Number(data.mileage || 0),
+      price: Number(data.price), condition: data.condition, fuel: data.fuel, transmission: data.transmission,
+      description: data.description, features: getCheckedFeatures("adminAddFeaturesChecklist"), images: imageUrls, status: isDraft ? "draft" : "approved", views: 0,
+      category: data.category || "vehicles",
+      listingType: data.listingType === "rto" ? "rto" : "sale",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    };
+
+    if (isDraft) {
+      // Keep it under the admin's own account while it's a draft (so it doesn't
+      // show in the dealer's own portal yet); remember who it's really for so
+      // "Publish now" can hand it over correctly.
+      docData.dealerId = uid;
+      docData.dealerUid = uid;
+      docData.intendedDealerUid = selectedDealer ? selectedDealer.id : "";
+    } else {
+      const ownerUid = selectedDealer ? selectedDealer.id : uid;
+      docData.dealerId = ownerUid;
+      docData.dealerUid = ownerUid;
+    }
+
+    await vehicleRef.set(docData);
+    form.reset();
+    adminPhotos = [];
+    renderAdminPhotoPreview();
+    applyCategoryFieldsToForm("vehicles", "adminAdd");
+    document.getElementById("adminVehicleLocation").value = "";
+    const successBox = document.getElementById("adminVehicleSuccess");
+    successBox.textContent = isDraft ? "Saved as a draft — find it under the Drafts tab whenever you're ready to publish." : "Published! It's live on the site now.";
+    successBox.classList.remove("hidden");
+    setTimeout(() => successBox.classList.add("hidden"), 4000);
+  } catch (err) {
+    errorBox.innerHTML = `<div class="error-text" style="margin:0 0 10px;">${err.message}</div>`;
+  } finally {
+    label.textContent = original;
+    button.disabled = false;
+  }
+  return false;
+}
+
+// ---- Banner Ads ----
+let bannerPhoto = null;
+async function handleBannerPhotoSelect(event) {
+  const files = Array.from(event.target.files || []);
+  event.target.value = "";
+  if (files.length === 0) { alert("No image came through — try again, or take a new photo."); return; }
+  const f = files[0];
+  if (!isLikelyImageFile(f)) { alert("That doesn't look like an image file."); return; }
+  bannerPhoto = isHeicFile(f) ? await convertHeicToJpeg(f) : f;
+  document.getElementById("bannerPhotoPreview").innerHTML = `<div class="photo-thumb"><img src="${URL.createObjectURL(bannerPhoto)}"></div>`;
+}
+
+async function submitAddBanner(event) {
+  event.preventDefault();
+  const form = event.target;
+  const data = Object.fromEntries(new FormData(form).entries());
+  const errorBox = document.getElementById("addBannerError");
+  errorBox.innerHTML = "";
+  if (!bannerPhoto) { errorBox.innerHTML = '<div class="error-text" style="margin:0 0 10px;">Please choose a banner image.</div>'; return false; }
+  if (data.endDate < data.startDate) { errorBox.innerHTML = '<div class="error-text" style="margin:0 0 10px;">End date can\'t be before the start date.</div>'; return false; }
+  const button = form.querySelector("button[type=submit]");
+  const label = button.querySelector(".btn-label");
+  const original = label.textContent;
+  label.textContent = "Saving...";
+  button.disabled = true;
+  try {
+    const imageUrl = await uploadImageToCloudinary(bannerPhoto);
+    await db.collection("banners").add({
+      advertiserName: data.advertiserName, contactInfo: data.contactInfo || "", slot: Number(data.slot),
+      startDate: data.startDate, endDate: data.endDate, linkUrl: data.linkUrl || "", imageUrl,
+      approved: !!data.approved, createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    form.reset();
+    bannerPhoto = null;
+    document.getElementById("bannerPhotoPreview").innerHTML = "";
+  } catch (err) {
+    errorBox.innerHTML = `<div class="error-text" style="margin:0 0 10px;">${err.message}</div>`;
+  } finally {
+    label.textContent = original;
+    button.disabled = false;
+  }
+  return false;
+}
+
+function bannerStatus(b) {
+  const today = new Date().toISOString().slice(0, 10);
+  if (!b.approved) return { label: "Pending payment", cls: "status-pending" };
+  if (b.endDate < today) return { label: "Expired", cls: "status-rejected" };
+  if (b.startDate > today) return { label: "Scheduled", cls: "status-pending" };
+  return { label: "Live", cls: "status-approved" };
+}
+async function approveBanner(id) {
+  try { await db.collection("banners").doc(id).update({ approved: true }); }
+  catch (err) { alert("Couldn't approve: " + err.message); }
+}
+async function deleteBanner(id) {
+  if (!confirm("Delete this banner permanently?")) return;
+  try { await db.collection("banners").doc(id).delete(); }
+  catch (err) { alert("Couldn't delete: " + err.message); }
+}
+
+// ---- Ad pricing (shown on the public "Advertise With Us" page) ----
+function renderAdPricingListAdmin() {
+  const box = document.getElementById("adPricingListAdmin");
+  if (!box) return;
+  const list = window.adPricingList || [];
+  box.innerHTML = list.length
+    ? list.map((r, i) => `<div style="display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--navy);padding:6px 0;border-bottom:1px solid var(--line);"><span>${r.label} &mdash; <strong>${r.price}</strong></span><button type="button" onclick="removeAdPrice(${i})" style="border:none;background:none;color:var(--bad);cursor:pointer;font-size:16px;">&times;</button></div>`).join("")
+    : '<div style="font-size:13px;color:var(--steel);">No rates added yet — add your first one below.</div>';
+}
+async function submitAddAdPrice(event) {
+  event.preventDefault();
+  const form = event.target;
+  const label = form.priceLabel.value.trim();
+  const price = form.priceValue.value.trim();
+  if (!label || !price) return false;
+  try {
+    const current = window.adPricingList || [];
+    await db.collection("settings").doc("adPricing").set({ list: [...current, { label, price }] }, { merge: true });
+    form.reset();
+  } catch (err) {
+    alert("Couldn't add that: " + err.message);
+  }
+  return false;
+}
+async function removeAdPrice(index) {
+  const current = window.adPricingList || [];
+  const updated = current.filter((_, i) => i !== index);
+  try {
+    await db.collection("settings").doc("adPricing").set({ list: updated }, { merge: true });
+  } catch (err) {
+    alert("Couldn't remove that: " + err.message);
+  }
+}
+</script>
+
+</body>
+</html>

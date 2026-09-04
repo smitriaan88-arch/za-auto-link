@@ -1,0 +1,192 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Resolves whoever is logged in — a primary dealer account OR a team
+    // member (owner/manager/salesperson) added under one — down to the
+    // dealer UID whose data they should see. Returns null if neither.
+    function callerDealerUid() {
+      return request.auth == null ? null :
+        (exists(/databases/$(database)/documents/dealers/$(request.auth.uid))
+          ? request.auth.uid
+          : (exists(/databases/$(database)/documents/dealerTeam/$(request.auth.uid))
+              ? get(/databases/$(database)/documents/dealerTeam/$(request.auth.uid)).data.dealerUid
+              : null));
+    }
+    // True if the logged-in user (primary dealer or one of their team) is
+    // the dealer that owns targetDealerUid's data.
+    function canActAsDealer(targetDealerUid) {
+      let d = callerDealerUid();
+      return d != null && d == targetDealerUid;
+    }
+    function isApprovedDealer(dealerUid) {
+      return dealerUid != null && get(/databases/$(database)/documents/dealers/$(dealerUid)).data.status == 'approved';
+    }
+
+    // Keyed by the dealer's own Firebase Auth UID.
+    match /dealers/{uid} {
+      allow create: if request.auth != null
+                    && request.auth.uid == uid
+                    && request.resource.data.status == 'pending';
+      allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
+      // Dealers may self-manage ONLY their WhatsApp lead-alert opt-in (a
+      // CallMeBot number + personal apikey) — nothing else on their own
+      // record. Everything else (status, categories, name, etc.) stays
+      // admin-only, matching the update rule below.
+      allow update: if isAdmin()
+                    || (request.auth != null && request.auth.uid == uid
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['whatsappNumber', 'whatsappApiKey']));
+      allow delete: if isAdmin();
+    }
+
+    // Owner/manager/salesperson logins added under a primary dealer account.
+    // subUid is that team member's OWN Firebase Auth UID; dealerUid on the
+    // doc points back to the primary dealer whose portal data they share.
+    match /dealerTeam/{subUid} {
+      allow read: if isAdmin()
+                  || (request.auth != null && request.auth.uid == subUid)
+                  || (request.auth != null && resource.data.dealerUid == request.auth.uid);
+      // Only the PRIMARY dealer (their own login, not a team member) or admin
+      // may add someone to the team — team members can't add more team members.
+      allow create: if isAdmin()
+                    || (request.auth != null
+                        && request.resource.data.dealerUid == request.auth.uid
+                        && exists(/databases/$(database)/documents/dealers/$(request.auth.uid)));
+      // A team member may change only their own WhatsApp opt-in. The primary
+      // dealer may change only a team member's role. Nothing else, by anyone
+      // but admin — dealerUid itself is never editable after creation.
+      allow update: if isAdmin()
+                    || (request.auth != null && request.auth.uid == subUid
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['whatsappNumber', 'whatsappApiKey']))
+                    || (request.auth != null && resource.data.dealerUid == request.auth.uid
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role']));
+      allow delete: if isAdmin() || (request.auth != null && resource.data.dealerUid == request.auth.uid);
+    }
+
+    match /vehicles/{vehicleId} {
+      // The direct `resource.data.dealerUid == request.auth.uid` clause here
+      // matters, not just as a shortcut: Firestore validates a list query
+      // against the rule BEFORE running it, using only the query's own
+      // where() clauses — it can't reason about a custom function that does
+      // its own get()/exists() lookups (canActAsDealer), so a dealer's own
+      // "where dealerUid == me" query would be rejected outright without
+      // this simpler, directly-provable alternative. canActAsDealer() still
+      // covers admin and team-member access, and single-document reads.
+      allow read: if resource.data.status == 'approved'
+                  || isAdmin()
+                  || (request.auth != null && resource.data.dealerUid == request.auth.uid)
+                  || (request.auth != null && canActAsDealer(resource.data.dealerUid));
+
+      // A dealer (or their team) may create a PENDING vehicle (submit for
+      // approval) or a DRAFT (saved for later). Admins may create vehicles
+      // directly as 'approved' (the "Add a Vehicle" tab).
+      allow create: if isAdmin()
+                    || (request.auth != null
+                        && canActAsDealer(request.resource.data.dealerUid)
+                        && isApprovedDealer(request.resource.data.dealerUid)
+                        && request.resource.data.status in ['pending', 'draft']);
+
+      allow update: if isAdmin()
+                    || (request.auth != null
+                        && canActAsDealer(resource.data.dealerUid)
+                        // 'approved' is allowed here alongside 'sold' so a dealer
+                        // can flip their own vehicle back to available after
+                        // marking it sold by mistake — this only re-activates a
+                        // listing that already passed admin review once, it
+                        // doesn't let a brand-new submission skip review (that
+                        // still has to start as 'pending', enforced above).
+                        && request.resource.data.status in ['pending', 'sold', 'draft', 'approved'])
+                    // Public: allow bumping the view counter only — nothing else may change,
+                    // and only on vehicles that are actually live on the site. Older vehicles
+                    // without a views field yet start counting from 1.
+                    || (resource.data.status == 'approved'
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])
+                        && (
+                             (!('views' in resource.data) && request.resource.data.views == 1)
+                             || (('views' in resource.data) && request.resource.data.views == resource.data.views + 1)
+                           ));
+      allow delete: if isAdmin()
+                    || (request.auth != null && canActAsDealer(resource.data.dealerUid));
+    }
+
+    // Public (unauthenticated) customers can create these — that's how the
+    // Sell / Buy Request / Enquiry forms work without requiring a login.
+    match /sellLeads/{id} {
+      allow create: if request.resource.data.status == 'new';
+      allow read, update: if isAdmin();
+    }
+    match /buyRequests/{id} {
+      allow create: if request.resource.data.status == 'new';
+      allow read, update: if isAdmin();
+    }
+    match /insuranceLeads/{id} {
+      allow create: if request.resource.data.status == 'new';
+      allow read, update: if isAdmin();
+    }
+    match /rtoLeads/{id} {
+      allow create: if request.resource.data.status == 'new';
+      allow read, update: if isAdmin();
+    }
+    match /enquiries/{id} {
+      allow create: if request.resource.data.status == 'new';
+      allow read: if isAdmin()
+                  || (request.auth != null && resource.data.dealerUid == request.auth.uid)
+                  || (request.auth != null && canActAsDealer(resource.data.dealerUid));
+      allow update: if isAdmin()
+                    || (request.auth != null && resource.data.dealerUid == request.auth.uid)
+                    || (request.auth != null && canActAsDealer(resource.data.dealerUid));
+    }
+
+    // Only editable from the Firebase Console (Authentication tab's UID +
+    // manually adding a doc here) — never from client code.
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Shared list of vehicle spec checkboxes (A/C, ABS, etc.) — any signed-in
+    // dealer or admin can read it to render the checklist; only admins edit it.
+    match /settings/{docId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+    // Ad pricing is shown on the public "Advertise With Us" page, so it needs
+    // to be readable by visitors who aren't signed in at all — this adds to,
+    // not replaces, the settings rule above.
+    match /settings/adPricing {
+      allow read: if true;
+    }
+
+    // Advertising banners. Only approved ones (payment confirmed, ticked live
+    // by an admin) are visible to the public; everything else — including who
+    // the advertiser is and their contact details — stays admin-only.
+    match /banners/{id} {
+      allow read: if resource.data.approved == true;
+      allow read, write: if isAdmin();
+    }
+
+    // Approved dealers (or their team) asking ZA Auto Link to source a vehicle.
+    match /dealerRequests/{id} {
+      allow create: if request.auth != null
+                    && canActAsDealer(request.resource.data.dealerUid)
+                    && isApprovedDealer(request.resource.data.dealerUid)
+                    && request.resource.data.status == 'new';
+      allow read: if isAdmin()
+                  || (request.auth != null && resource.data.dealerUid == request.auth.uid)
+                  || (request.auth != null && canActAsDealer(resource.data.dealerUid));
+      allow update: if isAdmin();
+    }
+
+    // Admin activity log — append-only audit trail. Nobody can edit or delete
+    // an entry once it's written, including admins — that's what keeps it trustworthy.
+    match /activityLog/{id} {
+      allow create: if isAdmin();
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+  }
+}
